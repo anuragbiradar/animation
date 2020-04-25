@@ -43,6 +43,9 @@ class render {
 		float moveObject;
 		rotationAxis prev_axis;
 		unsigned int diffuseMap, diffuseMapSphere;
+		unsigned int floorTexture;
+		unsigned int transparentTexture;
+		unsigned int planeVertexBufferObject, grassVertexBufferObject, planeVertexArrayObject, grassVertexArrayObject;
 		GLuint LoadShaders(const char *vert_file, const char *frag_file);
 	public:
 		render();
@@ -50,6 +53,8 @@ class render {
 		void initRender(int width, int height, ply_parser *parser);
 		void setView1();
 		void drawSphere(int sphereIndex, objectAttributes attr);
+		void drawFloor();
+		void drawGrass();
 		void drawSpheres(rotationAxis axis, objectDirection translate);
 		unsigned int loadTexture(char const * path);
 };

@@ -16,7 +16,7 @@ using namespace std;
 
 #define PI 3.14159265
 
-glm::vec3 cameraPosition1(4.0f, 4.0f, -60.0f); 
+glm::vec3 cameraPosition1(1.0f, 1.0f, 3.0f); 
 
 glm::vec3 positions[] = {
 	glm::vec3(10.0f, 10.0f, -40.3f),
@@ -74,7 +74,7 @@ render::~render() {
 }
 
 void render::initRender(int width, int height, ply_parser *parser) {
-	sphereProgramId = LoadShaders("data/sphere.vs", "data/sphere.fs");
+	sphereProgramId = LoadShaders("data/3.1.blending.vs", "data/3.1.blending.fs");
 	SCR_WIDTH = width;
 	SCR_HEIGHT = height;
 	glEnable(GL_DEPTH_TEST);
@@ -106,6 +106,7 @@ void render::initRender(int width, int height, ply_parser *parser) {
 		vertex.push_back(v);
 	}
 
+#if 1
 	// Sphere Data
 	glGenVertexArrays(1, &sphereVertexArrayObject);
 	glGenBuffers(1, &sphereVertexBufferObject);
@@ -123,17 +124,66 @@ void render::initRender(int width, int height, ply_parser *parser) {
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
 
+	//glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	//diffuseMap = loadTexture("data/container2.png");	
+	diffuseMapSphere = loadTexture("data/earth.png");	
+	diffuseMapSphere = loadTexture("data/chess.png");	
+#endif
+#if 1
+	float planeVertices[] = {
+		// positions          // texture Coords 
+		5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+		-5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
+		-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+
+		5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+		-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+		5.0f, -0.5f, -5.0f,  2.0f, 2.0f
+	};
+	float transparentVertices[] = {
+		// positions         // texture Coords (swapped y coordinates because texture is flipped upside down)
+		0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+		0.0f, -0.5f,  0.0f,  0.0f,  1.0f,
+		1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+
+		0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+		1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+		1.0f,  0.5f,  0.0f,  1.0f,  0.0f
+	};
+	floorTexture = loadTexture("data/metal.png");
+	transparentTexture = loadTexture("data/grass.png");
+
+	glGenVertexArrays(1, &planeVertexArrayObject);
+	glGenBuffers(1, &planeVertexBufferObject);
+	glBindVertexArray(planeVertexArrayObject);
+	glBindBuffer(GL_ARRAY_BUFFER, planeVertexBufferObject);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+
+
+	glGenVertexArrays(1, &grassVertexArrayObject);
+	glGenBuffers(1, &grassVertexBufferObject);
+	glBindVertexArray(grassVertexArrayObject);
+	glBindBuffer(GL_ARRAY_BUFFER, grassVertexBufferObject);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(transparentVertices), &transparentVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+#endif
+		
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	diffuseMap = loadTexture("data/container2.png");	
-	diffuseMapSphere = loadTexture("data/earth.png");	
-	//diffuseMapSphere = loadTexture("data/chess.png");	
 	return;
 }
 
 void render::setView1() {
-	projectionMatrix1 = glm::perspective(glm::radians(10.0f), (float) SCR_WIDTH/ (float) SCR_HEIGHT, 0.1f, 100.0f);
+	projectionMatrix1 = glm::perspective(glm::radians(45.0f), (float) SCR_WIDTH/ (float) SCR_HEIGHT, 0.1f, 100.0f);
 
 	//projectionMatrix = glm::ortho(-100.0f,100.0f,-100.0f,100.0f,0.0f,50.0f); // In world coordinates
 	glCheckError();
@@ -160,6 +210,7 @@ void render::setView1() {
 	glBindVertexArray(sphereVertexArrayObject);
 }
 
+#if 0
 unsigned int render::loadTexture(char const * path)
 {
 	unsigned int textureID;
@@ -196,6 +247,76 @@ unsigned int render::loadTexture(char const * path)
 
 	return textureID;
 }
+#endif
+
+unsigned int render::loadTexture(char const * path)
+{
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+
+    int width, height, nrComponents;
+    unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
+    if (data)
+    {
+        GLenum format;
+        if (nrComponents == 1)
+            format = GL_RED;
+        else if (nrComponents == 3)
+            format = GL_RGB;
+        else if (nrComponents == 4)
+            format = GL_RGBA;
+
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT); // for this tutorial: use GL_CLAMP_TO_EDGE to prevent semi-transparent borders. Due to interpolation it takes texels from next repeat 
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    }
+    else
+    {
+        std::cout << "Texture failed to load at path: " << path << std::endl;
+        stbi_image_free(data);
+    }
+
+    return textureID;
+}
+
+void render::drawFloor() {
+
+	glm::mat4 modelMatrix = glm::mat4(1.0f);
+	GLuint modelID = glGetUniformLocation(sphereProgramId, "model");
+	glUniformMatrix4fv(modelID, 1, GL_FALSE, &modelMatrix[0][0]);
+	glm::mat4 mvp = projectionMatrix1 * viewMatrix1 * modelMatrix;
+	GLuint mvpID = glGetUniformLocation(sphereProgramId, "MVP");
+	glUniformMatrix4fv(mvpID, 1, GL_FALSE, &mvp[0][0]);
+	
+	glActiveTexture(GL_TEXTURE0);
+	glBindVertexArray(planeVertexArrayObject);
+	glBindTexture(GL_TEXTURE_2D, floorTexture);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+
+void render::drawGrass() {
+
+	glm::mat4 modelMatrix = glm::mat4(1.0f);
+	GLuint modelID = glGetUniformLocation(sphereProgramId, "model");
+	glUniformMatrix4fv(modelID, 1, GL_FALSE, &modelMatrix[0][0]);
+	glm::mat4 mvp = projectionMatrix1 * viewMatrix1 * modelMatrix;
+	GLuint mvpID = glGetUniformLocation(sphereProgramId, "MVP");
+	glUniformMatrix4fv(mvpID, 1, GL_FALSE, &mvp[0][0]);
+	
+	glActiveTexture(GL_TEXTURE0);
+	glBindVertexArray(grassVertexArrayObject);
+	//glBindTexture(GL_TEXTURE_2D, floorTexture);
+	glBindTexture(GL_TEXTURE_2D, transparentTexture);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+}
 
 void render::drawSphere(int sphereIndex, objectAttributes attr) {
 
@@ -213,7 +334,7 @@ void render::drawSphere(int sphereIndex, objectAttributes attr) {
 
 	// Model matrix : an identity matrix (model will be at the origin)
 	glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), spherePosition[sphereIndex]);
-	glm::vec3 scale = glm::vec3(0.05f, 0.05f, 0.05f);
+	glm::vec3 scale = glm::vec3(0.005f, 0.005f, 0.005f);
 	modelMatrix = glm::scale(modelMatrix, scale);
 	modelMatrix = glm::rotate(modelMatrix, glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	static float rot = 0.0f;
@@ -263,7 +384,6 @@ void render::drawSphere(int sphereIndex, objectAttributes attr) {
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, diffuseMapSphere);
-
 	glDrawArrays(GL_TRIANGLES, 0, vertex.size());
 }
 
@@ -272,6 +392,7 @@ void render::drawSpheres(rotationAxis axis, objectDirection translate) {
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	glCheckError();
 	glUseProgram(sphereProgramId);
 	GLuint textureID  = glGetUniformLocation(sphereProgramId, "myTextureSampler");
 	glUniform1i(textureID, 0);
@@ -288,6 +409,8 @@ void render::drawSpheres(rotationAxis axis, objectDirection translate) {
 	// (Middle Column) Column wise First is bottom
 	attr.diffuseStrength = 0.0; attr.specularStrength = 0.5;
 	drawSphere(1, attr);
+	drawFloor();
+	drawGrass();
 }
 
 GLuint render::LoadShaders(const char * vertex_file_path,const char * fragment_file_path){
