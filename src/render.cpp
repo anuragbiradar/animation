@@ -128,7 +128,7 @@ void render::initRender(int width, int height, ply_parser *parser) {
 
 	//diffuseMap = loadTexture("data/container2.png");	
 	diffuseMapSphere = loadTexture("data/earth.png");	
-	diffuseMapSphere = loadTexture("data/chess.png");	
+	//diffuseMapSphere = loadTexture("data/chess.png");	
 #endif
 #if 1
 	float planeVertices[] = {
@@ -207,7 +207,6 @@ void render::setView1() {
 	GLuint lightColorID = glGetUniformLocation(sphereProgramId, "lightColor");
 	glUniform3fv(lightColorID, 1, glm::value_ptr(LightColor));
 
-	glBindVertexArray(sphereVertexArrayObject);
 }
 
 #if 0
@@ -322,13 +321,13 @@ void render::drawSphere(int sphereIndex, objectAttributes attr) {
 
 	if (attr.translate != MOVE_INVALID) {
 		if (attr.translate == MOVE_LEFT) {
-			spherePosition[sphereIndex].x += 1.0f;
+			spherePosition[sphereIndex].x += 0.1f;
 		} else if (attr.translate == MOVE_RIGHT) {
-			spherePosition[sphereIndex].x -= 1.0f;
+			spherePosition[sphereIndex].x -= 0.1f;
 		} else if (attr.translate == MOVE_UP) {
-			spherePosition[sphereIndex].y += 1.0f;
+			spherePosition[sphereIndex].y += 0.1f;
 		} else {
-			spherePosition[sphereIndex].y -= 1.0f;
+			spherePosition[sphereIndex].y -= 0.1f;
 		}
 	}
 
@@ -382,9 +381,20 @@ void render::drawSphere(int sphereIndex, objectAttributes attr) {
 	GLuint mvpID = glGetUniformLocation(sphereProgramId, "MVP");
 	glUniformMatrix4fv(mvpID, 1, GL_FALSE, &mvp[0][0]);
 
+	glBindVertexArray(sphereVertexArrayObject);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, diffuseMapSphere);
 	glDrawArrays(GL_TRIANGLES, 0, vertex.size());
+	//spherePosition[sphereIndex].y += 0.5f;
+	glm::vec3 pos = spherePosition[sphereIndex];
+	pos.y -= 0.5f;
+	pos.z += 0.5f;
+	glm::mat4 basketModel = glm::translate(glm::mat4(1.0f), pos);
+	basketModel = glm::scale(basketModel, glm::vec3(0.5f, 0.5f, 0.5f));
+	modelID = glGetUniformLocation(sphereProgramId, "model");
+	glUniformMatrix4fv(modelID, 1, GL_FALSE, &basketModel[0][0]);
+	glBindVertexArray(grassVertexArrayObject);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 void render::drawSpheres(rotationAxis axis, objectDirection translate) {

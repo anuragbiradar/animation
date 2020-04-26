@@ -13,6 +13,7 @@ typedef enum _mobject_ {
 	MESH_OBJECT_3,
 } mesh_object_type;
 
+
 void handleKeys(GLFWwindow* window, int key, int code, int action, int mode);
 
 class window_mgmt {
