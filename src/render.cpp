@@ -126,7 +126,7 @@ void render::initRender(int width, int height, ply_parser *parser) {
 
 	//glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	//diffuseMap = loadTexture("data/container2.png");	
+	diffuseMap = loadTexture("data/container2.png");	
 	diffuseMapSphere = loadTexture("data/earth.png");	
 	//diffuseMapSphere = loadTexture("data/chess.png");	
 #endif
@@ -394,6 +394,8 @@ void render::drawSphere(int sphereIndex, objectAttributes attr) {
 	modelID = glGetUniformLocation(sphereProgramId, "model");
 	glUniformMatrix4fv(modelID, 1, GL_FALSE, &basketModel[0][0]);
 	glBindVertexArray(grassVertexArrayObject);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, diffuseMap);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
