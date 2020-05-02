@@ -4,8 +4,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
 
 #include <fstream>
 #include <sstream>
@@ -14,7 +12,6 @@
 #include "render.h"
 using namespace std;
 
-#define PI 3.14159265
 
 glm::vec3 cameraPosition1(1.0f, 1.0f, 3.0f); 
 
@@ -71,66 +68,16 @@ render::~render() {
 	glDeleteBuffers(1, &sphereVertexArrayObject);
 	glDeleteBuffers(1, &sphereVertexBufferObject);
 	glDeleteProgram(sphereProgramId);
+	for (int i = 0; i < graphList.size(); i++)
+		delete graphList[i];
 }
 
 void render::initRender(int width, int height, ply_parser *parser) {
-	sphereProgramId = LoadShaders("data/3.1.blending.vs", "data/3.1.blending.fs");
-	SCR_WIDTH = width;
-	SCR_HEIGHT = height;
-	glEnable(GL_DEPTH_TEST);
-	/* Build Vertex vector */
-	points = parser->get_element_face_points();
-	for (int i = 0; i < points.size(); i++) {
-		vertex.push_back(points[i].x);
-		vertex.push_back(points[i].y);
-		vertex.push_back(points[i].z);
-		GLfloat x, y, z;
-		points[i].get_avg_vertex_normal(&x, &y, &z);
-		vertex.push_back(x);
-		vertex.push_back(y);
-		vertex.push_back(z);
-		// Calculate UV
-#if 0
-		float u = asin(x)/PI + 0.5;
-		float v = asin(y)/PI + 0.5;
-		cout << "u v " << u << " " << v << endl;
-		vertex.push_back(u);
-		vertex.push_back(v);
-#endif
-		glm::vec3 vert = glm::vec3(points[i].x, points[i].y, points[i].z);
-		float theta = atan2(vert.z, vert.x);
-		float u = (theta + PI) / (2 * PI);
-		float phi = acos(vert.y / glm::length(vert));
-		float v = phi / PI;
-		vertex.push_back(u);
-		vertex.push_back(v);
-	}
 
-#if 1
-	// Sphere Data
-	glGenVertexArrays(1, &sphereVertexArrayObject);
-	glGenBuffers(1, &sphereVertexBufferObject);
-	glBindVertexArray(sphereVertexArrayObject);
-
-	glBindBuffer(GL_ARRAY_BUFFER, sphereVertexBufferObject);
-	// Add texture
-	glBufferData(GL_ARRAY_BUFFER, vertex.size() * sizeof(float), &vertex[0], GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
-
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	diffuseMap = loadTexture("data/container2.png");	
-	diffuseMapSphere = loadTexture("data/earth.png");	
-	//diffuseMapSphere = loadTexture("data/chess.png");	
-#endif
-#if 1
+	//Camera
+	Camera camera(glm::vec3(1.0f, 1.0f, 3.0f), "Camera_1");
+	//Create Parent node
+	sceneNode *landNode = new sceneNode("Land");
 	float planeVertices[] = {
 		// positions          // texture Coords 
 		5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
@@ -141,6 +88,14 @@ void render::initRender(int width, int height, ply_parser *parser) {
 		-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
 		5.0f, -0.5f, -5.0f,  2.0f, 2.0f
 	};
+	landNode->loadMeshObj(planeVertices, sizeof(planeVertices)/sizeof(float));
+	landNode->material.loadTexture("data/metal.png");
+	sceneGraph *landGraph = new sceneGraph(landNode, "LandGraph");
+	landGraph->init(camera);
+	glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float) width/ (float) height, 0.1f, 100.0f);
+	landGraph->setProjectionMatix(projectionMatrix);
+
+	sceneNode *grassNode = new sceneNode("Grass");
 	float transparentVertices[] = {
 		// positions         // texture Coords (swapped y coordinates because texture is flipped upside down)
 		0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
@@ -151,33 +106,38 @@ void render::initRender(int width, int height, ply_parser *parser) {
 		1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
 		1.0f,  0.5f,  0.0f,  1.0f,  0.0f
 	};
-	floorTexture = loadTexture("data/metal.png");
-	transparentTexture = loadTexture("data/grass.png");
+	grassNode->loadMeshObj(transparentVertices, sizeof(transparentVertices)/sizeof(float));
+	grassNode->material.loadTexture("data/grass.png");
+	landGraph->addChild(grassNode);
 
-	glGenVertexArrays(1, &planeVertexArrayObject);
-	glGenBuffers(1, &planeVertexBufferObject);
-	glBindVertexArray(planeVertexArrayObject);
-	glBindBuffer(GL_ARRAY_BUFFER, planeVertexBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+	sphereProgramId = LoadShaders("data/3.1.blending.vs", "data/3.1.blending.fs");
+	SCR_WIDTH = width;
+	SCR_HEIGHT = height;
+	glEnable(GL_DEPTH_TEST);
+	landGraph->setShaderProgramId(sphereProgramId);
+	graphList.push_back(landGraph);
 
+	// Create Parash
+	sceneNode *sphereNode = new sceneNode("Sphere");
+	sphereNode->loadMeshObj("data/sphere.ply");
+	sphereNode->material.loadTexture("data/earth.png");
+	sphereNode->setScale(glm::vec3(0.002f, 0.002f, 0.002f));
+	sphereNode->setTransformation(glm::vec3(1.0f, -3.0f, 0.0f));
 
-	glGenVertexArrays(1, &grassVertexArrayObject);
-	glGenBuffers(1, &grassVertexBufferObject);
-	glBindVertexArray(grassVertexArrayObject);
-	glBindBuffer(GL_ARRAY_BUFFER, grassVertexBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(transparentVertices), &transparentVertices, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
-#endif
-		
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	sceneGraph *parachuteGraph = new sceneGraph(sphereNode, "Parachute");
+	parachuteGraph->init(camera);
+	parachuteGraph->setProjectionMatix(projectionMatrix);
+	
+	sceneNode *basketNode = new sceneNode("Basket");
+	basketNode->loadMeshObj(transparentVertices, sizeof(transparentVertices)/sizeof(float));
+	basketNode->material.loadTexture("data/container2.png");
+	basketNode->setScale(glm::vec3(0.3f, 0.3f, 0.3f));
+	basketNode->setTransformation(glm::vec3(0.0f, -3.2f, 0.2f));
+
+	parachuteGraph->addChild(basketNode);
+	parachuteGraph->setShaderProgramId(sphereProgramId);
+	
+	graphList.push_back(parachuteGraph);
 
 	return;
 }
@@ -246,7 +206,6 @@ unsigned int render::loadTexture(char const * path)
 
 	return textureID;
 }
-#endif
 
 unsigned int render::loadTexture(char const * path)
 {
@@ -284,6 +243,7 @@ unsigned int render::loadTexture(char const * path)
 
     return textureID;
 }
+#endif
 
 void render::drawFloor() {
 
@@ -403,7 +363,7 @@ void render::drawSpheres(rotationAxis axis, objectDirection translate) {
 
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+#if 0
 	glCheckError();
 	glUseProgram(sphereProgramId);
 	GLuint textureID  = glGetUniformLocation(sphereProgramId, "myTextureSampler");
@@ -423,6 +383,11 @@ void render::drawSpheres(rotationAxis axis, objectDirection translate) {
 	drawSphere(1, attr);
 	drawFloor();
 	drawGrass();
+#endif
+	for (int i = 0; i < graphList.size(); i++)
+	{
+		graphList[i]->displayScene();
+	}
 }
 
 GLuint render::LoadShaders(const char * vertex_file_path,const char * fragment_file_path){

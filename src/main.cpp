@@ -132,7 +132,7 @@ void handleKeys(GLFWwindow* window, int key, int code, int action, int mode)
 int main(int argc, char *argv[])
 {
 	ply_parser parser_obj;
-	parser_obj.load_ply("data/sphere.ply");
+	//parser_obj.load_ply("data/sphere.ply");
 
 	window_mgmr.window_set_ply_object(&parser_obj);
 	window_mgmr.window_mainloop_init();

@@ -2,6 +2,7 @@
 #define _RENDER_
 
 #include "ply_parser.h"
+#include "scene_graph.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -45,8 +46,10 @@ class render {
 		unsigned int diffuseMap, diffuseMapSphere;
 		unsigned int floorTexture;
 		unsigned int transparentTexture;
+		Texture texture;
 		unsigned int planeVertexBufferObject, grassVertexBufferObject, planeVertexArrayObject, grassVertexArrayObject;
 		GLuint LoadShaders(const char *vert_file, const char *frag_file);
+		vector<sceneGraph*> graphList;
 	public:
 		render();
 		~render();
@@ -56,6 +59,6 @@ class render {
 		void drawFloor();
 		void drawGrass();
 		void drawSpheres(rotationAxis axis, objectDirection translate);
-		unsigned int loadTexture(char const * path);
+		//unsigned int loadTexture(char const * path);
 };
 #endif
