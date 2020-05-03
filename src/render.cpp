@@ -75,7 +75,7 @@ render::~render() {
 void render::initRender(int width, int height, ply_parser *parser) {
 
 	//Camera
-	Camera camera(glm::vec3(1.0f, 1.0f, 3.0f), "Camera_1");
+	Camera *camera = new Camera(glm::vec3(1.0f, 1.0f, 5.0f), "Camera_1", height, width);
 	//Create Parent node
 	sceneNode *landNode = new sceneNode("Land");
 	float planeVertices[] = {
@@ -92,8 +92,6 @@ void render::initRender(int width, int height, ply_parser *parser) {
 	landNode->material.loadTexture("data/metal.png");
 	sceneGraph *landGraph = new sceneGraph(landNode, "LandGraph");
 	landGraph->init(camera);
-	glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float) width/ (float) height, 0.1f, 100.0f);
-	landGraph->setProjectionMatix(projectionMatrix);
 
 	sceneNode *grassNode = new sceneNode("Grass");
 	float transparentVertices[] = {
@@ -121,23 +119,28 @@ void render::initRender(int width, int height, ply_parser *parser) {
 	sceneNode *sphereNode = new sceneNode("Sphere");
 	sphereNode->loadMeshObj("data/sphere.ply");
 	sphereNode->material.loadTexture("data/earth.png");
-	sphereNode->setScale(glm::vec3(0.002f, 0.002f, 0.002f));
-	sphereNode->setTransformation(glm::vec3(1.0f, -3.0f, 0.0f));
+	sphereNode->setTransformation(glm::vec3(2.0f, 2.0f, 0.0f));
+	sphereNode->setScale(glm::vec3(0.005f, 0.005f, 0.005f));
 
 	sceneGraph *parachuteGraph = new sceneGraph(sphereNode, "Parachute");
 	parachuteGraph->init(camera);
-	parachuteGraph->setProjectionMatix(projectionMatrix);
 	
 	sceneNode *basketNode = new sceneNode("Basket");
 	basketNode->loadMeshObj(transparentVertices, sizeof(transparentVertices)/sizeof(float));
 	basketNode->material.loadTexture("data/container2.png");
-	basketNode->setScale(glm::vec3(0.3f, 0.3f, 0.3f));
-	basketNode->setTransformation(glm::vec3(0.0f, -3.2f, 0.2f));
+	basketNode->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+	basketNode->setTransformation(glm::vec3(4.6f, 3.3f, 0.0f));
 
 	parachuteGraph->addChild(basketNode);
 	parachuteGraph->setShaderProgramId(sphereProgramId);
 	
 	graphList.push_back(parachuteGraph);
+
+
+	// setup
+	for (int i = 0; i < graphList.size(); i++) {
+		graphList[i]->setup();
+	}
 
 	return;
 }
@@ -384,8 +387,16 @@ void render::drawSpheres(rotationAxis axis, objectDirection translate) {
 	drawFloor();
 	drawGrass();
 #endif
+		
 	for (int i = 0; i < graphList.size(); i++)
 	{
+		if (graphList[i]->getName().compare("Parachute") == 0) {
+			//std::cout << "NAME " << graphList[i]->getName() << "\n";
+			if (translate == MOVE_RIGHT)
+				graphList[i]->update(glm::vec3(0.2f, 0.0f, 0.0f));
+			if (translate == MOVE_LEFT)
+				graphList[i]->update(glm::vec3(-0.2f, 0.0f, 0.0f));
+		}
 		graphList[i]->displayScene();
 	}
 }

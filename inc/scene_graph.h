@@ -44,16 +44,30 @@ class Camera {
 private:
 	glm::vec3 position;
 	std::string name;
+	glm::mat4 projectionMatrix;
+	glm::mat4 viewMatrix;
+	bool isSetup;
 public:
-	Camera(glm::vec3 location, std::string name) {
-		position = location;
-		name = name;
-	}
+	Camera(glm::vec3 location, std::string name, unsigned int scrHeight, unsigned int scrWidth);
+
+	void setup(unsigned int id);
 	void setPosition(glm::vec3 location) {
 		position = location;
 	}
 	glm::vec3 getPosition() {
 		return position;
+	}
+	void setProjectionMatix(glm::mat4 matrix) {
+		projectionMatrix = matrix;
+	}
+	void setViewMatrix(glm::mat4 matrix) {
+		viewMatrix = matrix;
+	}
+	glm::mat4 getProjectionMatrix() {
+		return projectionMatrix;
+	}
+	glm::mat4 getViewMatrix() {
+		return viewMatrix;
 	}
 };
 
@@ -75,7 +89,11 @@ public:
 	inline void setParent(sceneNode *node) {
 		parent = node;
 	}
+	inline std::string getName() {
+		return name;
+	}
 	void init();
+	void setup();
 	void loadMeshObj(const char *plyFilePath);
 	void loadMeshObj(float *vertexs, int size);
 	void setMaterial(Material value);
@@ -90,9 +108,8 @@ class sceneGraph {
 private:
 	// make sure parent always at 0 index
 	vector<sceneNode*> childList;
-	glm::mat4 projectionMatrix;
-	glm::mat4 viewMatrix;
 	std::string name;
+	Camera *camera;
 	unsigned int shaderProgramId;
 public:
 	sceneGraph(sceneNode *parent, std::string name) {
@@ -105,17 +122,18 @@ public:
 		shaderProgramId = id;
 	}
 	// Init project matrix and view matrix
-	void init(Camera camera);
-
-	void setProjectionMatix(glm::mat4 matrix);
+	void init(Camera *camera);
 
 	void addChild(sceneNode *node) {
 		childList.push_back(node);
 		node->setParent(childList[0]);
 	}
-
+	inline std::string getName() {
+		return name;
+	}
+	void setup();
 	void displayScene();
-	void update(Camera camera);
+	void update(glm::vec3 translate);
 };
 
 #endif

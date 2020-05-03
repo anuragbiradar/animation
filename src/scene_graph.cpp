@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -46,6 +47,30 @@ unsigned int Texture::loadTexture(const char *texturePath) {
 	}
 
 	return textureID;
+}
+
+Camera::Camera(glm::vec3 location, std::string name, unsigned int scrHeight, unsigned int scrWidth) {
+	std::cout << "Camera init name " << name << "\n";
+	position = location;
+	this->name = name;
+	isSetup = false;
+	viewMatrix = glm::lookAt(
+			position, // Camera is at (4,3,3), in World Space
+			glm::vec3(0,0,0), // and looks at the origin
+			glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
+			);
+	projectionMatrix = glm::perspective(glm::radians(45.0f), (float) scrWidth/ (float) scrHeight, 0.1f, 100.0f);
+}
+
+void Camera::setup(unsigned int shaderProgramId) {
+	if (isSetup)
+		return;
+	std::cout << "Camera name " << name << " Setup\n";
+	GLuint viewID = glGetUniformLocation(shaderProgramId, "view");
+	glUniformMatrix4fv(viewID, 1, GL_FALSE, &viewMatrix[0][0]);
+	GLuint projectionID = glGetUniformLocation(shaderProgramId, "projection");
+	glUniformMatrix4fv(projectionID, 1, GL_FALSE, &projectionMatrix[0][0]);
+	isSetup = true;
 }
 
 sceneNode::~sceneNode() {
@@ -136,7 +161,11 @@ void sceneNode::setMaterial(Material value) {
 }
 
 void sceneNode::setTransformation(glm::vec3 translation) {
+	std::cout << "Name " << name << " set translate\n";
+	std::cout << "Before Content " << glm::to_string(modelMatrix) << "\n";
 	modelMatrix = glm::translate(modelMatrix, translation);
+	std::cout << "Name " << name << " set translate\n";
+	std::cout << "After Content " << glm::to_string(modelMatrix) << "\n";
 }
 
 void sceneNode::setTransformation(glm::mat4 matrix) {
@@ -146,6 +175,8 @@ void sceneNode::setTransformation(glm::mat4 matrix) {
 void sceneNode::setScale(glm::vec3 scale) {
 	// Check for init
 	modelMatrix = glm::scale(modelMatrix, scale);
+	std::cout << "Name " << name << " set scale\n";
+	std::cout << "Content " << glm::to_string(modelMatrix) << "\n";
 }
 
 void sceneNode::setRotation(float radian, glm::vec3 axis) {
@@ -165,7 +196,7 @@ void sceneNode::draw(unsigned int shaderProgramId) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, material.getTextureID());
 	glBindVertexArray(vertexArrayObject);
-	std::cout << "Size " << vertices.size() << "\n";
+	//std::cout << "Size " << vertices.size() << "\n";
 	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 }
 
@@ -176,38 +207,31 @@ sceneGraph::~sceneGraph() {
 	}
 }
 
-void sceneGraph::init(Camera camera) {
-	viewMatrix = glm::lookAt(
-			camera.getPosition(), // Camera is at (4,3,3), in World Space
-			glm::vec3(0,0,0), // and looks at the origin
-			glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
-			);
+void sceneGraph::init(Camera *camera) {
+	this->camera = camera;
 }
 
-void sceneGraph::setProjectionMatix(glm::mat4 matrix) {
-	projectionMatrix = matrix;	
+void sceneGraph::setup() {
+	glUseProgram(shaderProgramId);
+	camera->setup(shaderProgramId);
 }
 
-void sceneGraph::update(Camera camera) {
-	viewMatrix = glm::lookAt(
-			camera.getPosition(), // Camera is at (4,3,3), in World Space
-			glm::vec3(0,0,0), // and looks at the origin
-			glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
-			);
+void sceneGraph::update(glm::vec3 translate) {
 	//GLuint viewID = glGetUniformLocation(shaderProgramId, "view");
 	//glUniformMatrix4fv(viewID, 1, GL_FALSE, &viewMatrix[0][0]);
+
+	vector<sceneNode*>::iterator it;
+	for (it = childList.begin(); it != childList.end(); it++) {
+		std::cout << "ChildList name " << (*it)->getName() << "\n";
+		(*it)->setTransformation(translate);
+	}
+
 }
 
 void sceneGraph::displayScene() {
 	vector<sceneNode*>::iterator it;
-	glUseProgram(shaderProgramId);
-	// set ProjectMatrixm, view
 	//std::cout << "Set ViewMatix\n";
-	GLuint viewID = glGetUniformLocation(shaderProgramId, "view");
-	glUniformMatrix4fv(viewID, 1, GL_FALSE, &viewMatrix[0][0]);
-	GLuint projectionID = glGetUniformLocation(shaderProgramId, "projection");
 	//std::cout << "Set ProjectionMatix\n";
-	glUniformMatrix4fv(projectionID, 1, GL_FALSE, &projectionMatrix[0][0]);
 	GLuint textureID  = glGetUniformLocation(shaderProgramId, "myTextureSampler");
 	glUniform1i(textureID, 0);
 
