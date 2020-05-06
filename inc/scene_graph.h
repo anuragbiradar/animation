@@ -76,6 +76,8 @@ private:
 	ply_parser plyData;
 	std::string name;
 	glm::mat4 modelMatrix;
+	glm::vec3 scale;
+	glm::vec3 translate;
 	sceneNode *parent;
 	unsigned vertexArrayObject, vertexBufferObject;
 	vector<float> vertices;
@@ -84,7 +86,11 @@ public:
 	sceneNode(std::string objName) {
 		name = objName;
 		modelMatrix = glm::mat4(1);
+		scale = glm::vec3(1.0f);
+		translate = glm::vec3(0.0f);
+		parent = NULL;
 	}
+	sceneNode(std::string objName, glm::vec3 scale, glm::vec3 translate);
 	~sceneNode();
 	inline void setParent(sceneNode *node) {
 		parent = node;
@@ -102,6 +108,9 @@ public:
 	void setScale(glm::vec3 scale);
 	void setRotation(float radians, glm::vec3 axis);
 	void draw(unsigned int shaderProgramId);
+	glm::mat4 getModelMatrix() {
+		return modelMatrix;
+	}
 };
 
 class sceneGraph {

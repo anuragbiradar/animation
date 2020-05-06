@@ -73,6 +73,16 @@ void Camera::setup(unsigned int shaderProgramId) {
 	isSetup = true;
 }
 
+
+sceneNode::sceneNode(std::string objName, glm::vec3 scale, glm::vec3 translate) {
+	name = objName;
+	modelMatrix = glm::mat4(1);
+	this->scale = scale;
+	this->translate = translate;
+	modelMatrix = glm::translate(modelMatrix, translate);
+	//modelMatrix = glm::scale(modelMatrix, scale);
+}
+
 sceneNode::~sceneNode() {
 	glDeleteBuffers(1, &vertexArrayObject);
 	glDeleteBuffers(1, &vertexBufferObject);
@@ -161,11 +171,24 @@ void sceneNode::setMaterial(Material value) {
 }
 
 void sceneNode::setTransformation(glm::vec3 translation) {
+#if 1
 	std::cout << "Name " << name << " set translate\n";
-	std::cout << "Before Content " << glm::to_string(modelMatrix) << "\n";
-	modelMatrix = glm::translate(modelMatrix, translation);
+	//std::cout << "Before Content " << glm::to_string(modelMatrix) << "\n";
+	std::cout << "Before Translate " << glm::to_string(translate) << "\n";
+	translate += translation;
+	if (parent) {
+		std::cout << "Has parent\n";
+		modelMatrix = glm::translate(parent->getModelMatrix(), translate);
 	std::cout << "Name " << name << " set translate\n";
-	std::cout << "After Content " << glm::to_string(modelMatrix) << "\n";
+	//std::cout << "After Content " << glm::to_string(modelMatrix) << "\n";
+	std::cout << "After Translate " << glm::to_string(translate) <<"\n";
+		return;
+	}
+	modelMatrix = glm::translate(modelMatrix, translate);
+	std::cout << "Name " << name << " set translate\n";
+	//std::cout << "After Content " << glm::to_string(modelMatrix) << "\n";
+	std::cout << "After Translate " << glm::to_string(translate) <<"\n";
+#endif
 }
 
 void sceneNode::setTransformation(glm::mat4 matrix) {
@@ -174,9 +197,10 @@ void sceneNode::setTransformation(glm::mat4 matrix) {
 
 void sceneNode::setScale(glm::vec3 scale) {
 	// Check for init
-	modelMatrix = glm::scale(modelMatrix, scale);
-	std::cout << "Name " << name << " set scale\n";
-	std::cout << "Content " << glm::to_string(modelMatrix) << "\n";
+	//modelMatrix = glm::scale(modelMatrix, scale);
+	this->scale = scale;
+	//std::cout << "Name " << name << " set scale\n";
+	//std::cout << "Content " << glm::to_string(modelMatrix) << "\n";
 }
 
 void sceneNode::setRotation(float radian, glm::vec3 axis) {
@@ -188,10 +212,13 @@ void sceneNode::draw(unsigned int shaderProgramId) {
 	//std::cout << "Draw object " << name << "\n";
 	//Check parent data	
 	//glUseProgram(shaderProgramId);
-	
+	//std::cout << "X " << this->scale.x << "\n";
+	glm::mat4 matrix = glm::scale(modelMatrix, scale);
+	//if(name.compare("Sphere") == 0)
+	//	return;
 	GLuint modelID = glGetUniformLocation(shaderProgramId, "model");
 	//std::cout << "Set modelMatix\n";
-	glUniformMatrix4fv(modelID, 1, GL_FALSE, &modelMatrix[0][0]);
+	glUniformMatrix4fv(modelID, 1, GL_FALSE, &matrix[0][0]);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, material.getTextureID());

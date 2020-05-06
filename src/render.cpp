@@ -116,26 +116,27 @@ void render::initRender(int width, int height, ply_parser *parser) {
 	graphList.push_back(landGraph);
 
 	// Create Parash
+	//sceneNode *sphereNode = new sceneNode("Sphere", glm::vec3(0.005f, 0.005f, 0.005f), glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneNode *sphereNode = new sceneNode("Sphere");
 	sphereNode->loadMeshObj("data/sphere.ply");
 	sphereNode->material.loadTexture("data/earth.png");
-	sphereNode->setTransformation(glm::vec3(2.0f, 2.0f, 0.0f));
 	sphereNode->setScale(glm::vec3(0.005f, 0.005f, 0.005f));
+	sphereNode->setTransformation(glm::vec3(-0.6f, 1.0f, 0.0f));
 
 	sceneGraph *parachuteGraph = new sceneGraph(sphereNode, "Parachute");
 	parachuteGraph->init(camera);
 	
+	//sceneNode *basketNode = new sceneNode("Basket", glm::vec3(0.2f, 0.2f, 2.2f), glm::vec3(0.0f, -1.5f, 3.0f));
 	sceneNode *basketNode = new sceneNode("Basket");
+	parachuteGraph->addChild(basketNode);
 	basketNode->loadMeshObj(transparentVertices, sizeof(transparentVertices)/sizeof(float));
 	basketNode->material.loadTexture("data/container2.png");
-	basketNode->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
-	basketNode->setTransformation(glm::vec3(4.6f, 3.3f, 0.0f));
+	basketNode->setScale(glm::vec3(1.2f, 1.2f, 1.2f));
+	basketNode->setTransformation(glm::vec3(-0.5f, -1.5f, 1.0f));
 
-	parachuteGraph->addChild(basketNode);
 	parachuteGraph->setShaderProgramId(sphereProgramId);
 	
 	graphList.push_back(parachuteGraph);
-
 
 	// setup
 	for (int i = 0; i < graphList.size(); i++) {
@@ -145,249 +146,11 @@ void render::initRender(int width, int height, ply_parser *parser) {
 	return;
 }
 
-void render::setView1() {
-	projectionMatrix1 = glm::perspective(glm::radians(45.0f), (float) SCR_WIDTH/ (float) SCR_HEIGHT, 0.1f, 100.0f);
-
-	//projectionMatrix = glm::ortho(-100.0f,100.0f,-100.0f,100.0f,0.0f,50.0f); // In world coordinates
-	glCheckError();
-
-	viewMatrix1 = glm::lookAt(
-			cameraPosition1, // Camera is at (4,3,3), in World Space
-			glm::vec3(0,0,0), // and looks at the origin
-			glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
-			);
-	GLuint viewID = glGetUniformLocation(sphereProgramId, "view");
-	glUniformMatrix4fv(viewID, 1, GL_FALSE, &viewMatrix1[0][0]);
-
-	GLuint projectionID = glGetUniformLocation(sphereProgramId, "projection");
-	glUniformMatrix4fv(projectionID, 1, GL_FALSE, &projectionMatrix1[0][0]);
-
-	glm::vec3 ObjectColor(1.0f, 0.0f, 0.0f);
-	GLuint ObjectColorID = glGetUniformLocation(sphereProgramId, "objectColor");
-	glUniform3fv(ObjectColorID, 1, &ObjectColor[0]);
-
-	glm::vec3 LightColor(1.0f, 1.0f, 1.0f);
-	GLuint lightColorID = glGetUniformLocation(sphereProgramId, "lightColor");
-	glUniform3fv(lightColorID, 1, glm::value_ptr(LightColor));
-
-}
-
-#if 0
-unsigned int render::loadTexture(char const * path)
-{
-	unsigned int textureID;
-	glGenTextures(1, &textureID);
-
-	int width, height, nrComponents;
-	unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
-	if (data)
-	{
-		GLenum format;
-		if (nrComponents == 1)
-			format = GL_RED;
-		else if (nrComponents == 3)
-			format = GL_RGB;
-		else if (nrComponents == 4)
-			format = GL_RGBA;
-
-		glBindTexture(GL_TEXTURE_2D, textureID);
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		stbi_image_free(data);
-	}
-	else
-	{
-		std::cout << "Texture failed to load at path: " << path << std::endl;
-		stbi_image_free(data);
-	}
-
-	return textureID;
-}
-
-unsigned int render::loadTexture(char const * path)
-{
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-
-    int width, height, nrComponents;
-    unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
-    if (data)
-    {
-        GLenum format;
-        if (nrComponents == 1)
-            format = GL_RED;
-        else if (nrComponents == 3)
-            format = GL_RGB;
-        else if (nrComponents == 4)
-            format = GL_RGBA;
-
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT); // for this tutorial: use GL_CLAMP_TO_EDGE to prevent semi-transparent borders. Due to interpolation it takes texels from next repeat 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        stbi_image_free(data);
-    }
-    else
-    {
-        std::cout << "Texture failed to load at path: " << path << std::endl;
-        stbi_image_free(data);
-    }
-
-    return textureID;
-}
-#endif
-
-void render::drawFloor() {
-
-	glm::mat4 modelMatrix = glm::mat4(1.0f);
-	GLuint modelID = glGetUniformLocation(sphereProgramId, "model");
-	glUniformMatrix4fv(modelID, 1, GL_FALSE, &modelMatrix[0][0]);
-	glm::mat4 mvp = projectionMatrix1 * viewMatrix1 * modelMatrix;
-	GLuint mvpID = glGetUniformLocation(sphereProgramId, "MVP");
-	glUniformMatrix4fv(mvpID, 1, GL_FALSE, &mvp[0][0]);
-	
-	glActiveTexture(GL_TEXTURE0);
-	glBindVertexArray(planeVertexArrayObject);
-	glBindTexture(GL_TEXTURE_2D, floorTexture);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-}
-
-
-void render::drawGrass() {
-
-	glm::mat4 modelMatrix = glm::mat4(1.0f);
-	GLuint modelID = glGetUniformLocation(sphereProgramId, "model");
-	glUniformMatrix4fv(modelID, 1, GL_FALSE, &modelMatrix[0][0]);
-	glm::mat4 mvp = projectionMatrix1 * viewMatrix1 * modelMatrix;
-	GLuint mvpID = glGetUniformLocation(sphereProgramId, "MVP");
-	glUniformMatrix4fv(mvpID, 1, GL_FALSE, &mvp[0][0]);
-	
-	glActiveTexture(GL_TEXTURE0);
-	glBindVertexArray(grassVertexArrayObject);
-	//glBindTexture(GL_TEXTURE_2D, floorTexture);
-	glBindTexture(GL_TEXTURE_2D, transparentTexture);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-}
-
-void render::drawSphere(int sphereIndex, objectAttributes attr) {
-
-	if (attr.translate != MOVE_INVALID) {
-		if (attr.translate == MOVE_LEFT) {
-			spherePosition[sphereIndex].x += 0.1f;
-		} else if (attr.translate == MOVE_RIGHT) {
-			spherePosition[sphereIndex].x -= 0.1f;
-		} else if (attr.translate == MOVE_UP) {
-			spherePosition[sphereIndex].y += 0.1f;
-		} else {
-			spherePosition[sphereIndex].y -= 0.1f;
-		}
-	}
-
-	// Model matrix : an identity matrix (model will be at the origin)
-	glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), spherePosition[sphereIndex]);
-	glm::vec3 scale = glm::vec3(0.005f, 0.005f, 0.005f);
-	modelMatrix = glm::scale(modelMatrix, scale);
-	modelMatrix = glm::rotate(modelMatrix, glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	static float rot = 0.0f;
-	if (attr.axis != ROTATE_INVALID)
-	{
-		if (attr.axis == ROTATE_X)
-			modelMatrix = glm::rotate(modelMatrix, glm::radians(rot), glm::vec3(1.0f, 0.0f, 0.0f));
-		if (attr.axis == ROTATE_Y)
-			modelMatrix = glm::rotate(modelMatrix, glm::radians(rot), glm::vec3(0.0f, 1.0f, 0.0f));
-		if (attr.axis == ROTATE_Z)
-			modelMatrix = glm::rotate(modelMatrix, glm::radians(rot), glm::vec3(0.0f, 0.0f, 1.0f));
-		rot = rot + 3;
-		prev_axis = attr.axis;
-	} else {
-		if (prev_axis == ROTATE_X)
-			modelMatrix = glm::rotate(modelMatrix, glm::radians(rot), glm::vec3(1.0f, 0.0f, 0.0f));
-		if (prev_axis == ROTATE_Y)
-			modelMatrix = glm::rotate(modelMatrix, glm::radians(rot), glm::vec3(0.0f, 1.0f, 0.0f));
-		if (prev_axis == ROTATE_Z)
-			modelMatrix = glm::rotate(modelMatrix, glm::radians(rot), glm::vec3(0.0f, 0.0f, 1.0f));
-	}
-	if (rot > 360)
-		rot = 0.0f;
-	glCheckError();
-
-	GLuint lightPosID0 = glGetUniformLocation(sphereProgramId, "lightPos");
-	glUniform3fv(lightPosID0, 1, &positions[attr.lightPositionIndex][0]);
-
-	GLuint lightPosID1 = glGetUniformLocation(sphereProgramId, "lightPos1");
-	glUniform3fv(lightPosID1, 1, &positions[attr.lightPositionIndex+1][0]);
-
-	GLuint diffusedStrengthID = glGetUniformLocation(sphereProgramId, "diffuseStrength");
-	glUniform1f(diffusedStrengthID, attr.diffuseStrength);
-
-	GLuint specularStrengthID = glGetUniformLocation(sphereProgramId, "specularStrength");
-	glUniform1f(specularStrengthID, attr.specularStrength);
-
-	GLuint modelID = glGetUniformLocation(sphereProgramId, "model");
-	glUniformMatrix4fv(modelID, 1, GL_FALSE, &modelMatrix[0][0]);
-
-	GLuint cameraPositionID = glGetUniformLocation(sphereProgramId, "cameraPosition");
-	glUniform3fv(cameraPositionID, 1, &cameraPosition1[0]);
-
-	glm::mat4 mvp = projectionMatrix1 * viewMatrix1 * modelMatrix;
-	GLuint mvpID = glGetUniformLocation(sphereProgramId, "MVP");
-	glUniformMatrix4fv(mvpID, 1, GL_FALSE, &mvp[0][0]);
-
-	glBindVertexArray(sphereVertexArrayObject);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, diffuseMapSphere);
-	glDrawArrays(GL_TRIANGLES, 0, vertex.size());
-	//spherePosition[sphereIndex].y += 0.5f;
-	glm::vec3 pos = spherePosition[sphereIndex];
-	pos.y -= 0.5f;
-	pos.z += 0.5f;
-	glm::mat4 basketModel = glm::translate(glm::mat4(1.0f), pos);
-	basketModel = glm::scale(basketModel, glm::vec3(0.5f, 0.5f, 0.5f));
-	modelID = glGetUniformLocation(sphereProgramId, "model");
-	glUniformMatrix4fv(modelID, 1, GL_FALSE, &basketModel[0][0]);
-	glBindVertexArray(grassVertexArrayObject);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, diffuseMap);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-}
-
 void render::drawSpheres(rotationAxis axis, objectDirection translate) {
 
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-#if 0
-	glCheckError();
-	glUseProgram(sphereProgramId);
-	GLuint textureID  = glGetUniformLocation(sphereProgramId, "myTextureSampler");
-	glUniform1i(textureID, 0);
-	glCheckError();
-	setView1();
-	objectAttributes attr = {
-		.diffuseStrength = 0.0,
-		.specularStrength = 0.0,
-		.axis = axis,
-		.translate = translate,
-		.lightPositionIndex = 0,
-	};
-
-	// (Middle Column) Column wise First is bottom
-	attr.diffuseStrength = 0.0; attr.specularStrength = 0.5;
-	drawSphere(1, attr);
-	drawFloor();
-	drawGrass();
-#endif
-		
+	
 	for (int i = 0; i < graphList.size(); i++)
 	{
 		if (graphList[i]->getName().compare("Parachute") == 0) {
