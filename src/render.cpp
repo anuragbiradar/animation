@@ -131,8 +131,8 @@ void render::initRender(int width, int height, ply_parser *parser) {
 	parachuteGraph->addChild(basketNode);
 	basketNode->loadMeshObj(transparentVertices, sizeof(transparentVertices)/sizeof(float));
 	basketNode->material.loadTexture("data/container2.png");
-	basketNode->setScale(glm::vec3(1.2f, 1.2f, 1.2f));
-	basketNode->setTransformation(glm::vec3(-0.5f, -1.5f, 1.0f));
+	basketNode->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+	basketNode->setTransformation(glm::vec3(-0.3f, -0.7f, 0.0f));
 
 	parachuteGraph->setShaderProgramId(sphereProgramId);
 	
