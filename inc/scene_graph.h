@@ -75,6 +75,8 @@ class sceneNode {
 private:
 	ply_parser plyData;
 	std::string name;
+	glm::mat4 localMatrix;
+	glm::mat4 worldMatrix;
 	glm::mat4 modelMatrix;
 	glm::vec3 scale;
 	glm::vec3 translate;
@@ -86,6 +88,8 @@ public:
 	sceneNode(std::string objName) {
 		name = objName;
 		modelMatrix = glm::mat4(1);
+		localMatrix = glm::mat4(1);
+		worldMatrix = glm::mat4(1);
 		scale = glm::vec3(1.0f);
 		translate = glm::vec3(0.0f);
 		parent = NULL;
@@ -110,6 +114,12 @@ public:
 	void draw(unsigned int shaderProgramId);
 	glm::mat4 getModelMatrix() {
 		return modelMatrix;
+	}
+	glm::mat4 getLocalMatrix() {
+		return localMatrix;
+	}
+	glm::mat4 getWorldMatrix() {
+		return worldMatrix;
 	}
 };
 

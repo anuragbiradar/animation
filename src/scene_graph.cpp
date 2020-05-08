@@ -171,7 +171,7 @@ void sceneNode::setMaterial(Material value) {
 }
 
 void sceneNode::setTransformation(glm::vec3 translation) {
-#if 1
+#if 0
 	std::cout << "Name " << name << " set translate\n";
 	//std::cout << "Before Content " << glm::to_string(modelMatrix) << "\n";
 	std::cout << "Before Translate " << glm::to_string(translate) << "\n";
@@ -189,6 +189,12 @@ void sceneNode::setTransformation(glm::vec3 translation) {
 	//std::cout << "After Content " << glm::to_string(modelMatrix) << "\n";
 	std::cout << "After Translate " << glm::to_string(translate) <<"\n";
 #endif
+	std::cout << "Befor Update translation "<<name << " value "<< glm::to_string(translate) <<"\n";
+	translate += translation;
+	std::cout << "After Update translation "<<name << " value "<< glm::to_string(translate) << "\n";
+	localMatrix = glm::mat4(1);
+	localMatrix = glm::scale(localMatrix, scale);
+	localMatrix = glm::translate(localMatrix, translate);
 }
 
 void sceneNode::setTransformation(glm::mat4 matrix) {
@@ -201,6 +207,7 @@ void sceneNode::setScale(glm::vec3 scale) {
 	this->scale = scale;
 	//std::cout << "Name " << name << " set scale\n";
 	//std::cout << "Content " << glm::to_string(modelMatrix) << "\n";
+	localMatrix = glm::scale(localMatrix, scale);
 }
 
 void sceneNode::setRotation(float radian, glm::vec3 axis) {
@@ -213,12 +220,17 @@ void sceneNode::draw(unsigned int shaderProgramId) {
 	//Check parent data	
 	//glUseProgram(shaderProgramId);
 	//std::cout << "X " << this->scale.x << "\n";
-	glm::mat4 matrix = glm::scale(modelMatrix, scale);
+	//glm::mat4 matrix = glm::scale(modelMatrix, scale);
+	if (parent) {
+		worldMatrix = parent->getWorldMatrix() * localMatrix;
+	} else {
+		worldMatrix = localMatrix;
+	}
 	//if(name.compare("Sphere") == 0)
 	//	return;
 	GLuint modelID = glGetUniformLocation(shaderProgramId, "model");
 	//std::cout << "Set modelMatix\n";
-	glUniformMatrix4fv(modelID, 1, GL_FALSE, &matrix[0][0]);
+	glUniformMatrix4fv(modelID, 1, GL_FALSE, &worldMatrix[0][0]);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, material.getTextureID());
@@ -246,13 +258,14 @@ void sceneGraph::setup() {
 void sceneGraph::update(glm::vec3 translate) {
 	//GLuint viewID = glGetUniformLocation(shaderProgramId, "view");
 	//glUniformMatrix4fv(viewID, 1, GL_FALSE, &viewMatrix[0][0]);
-
+	childList[0]->setTransformation(translate);
+#if 0
 	vector<sceneNode*>::iterator it;
 	for (it = childList.begin(); it != childList.end(); it++) {
 		std::cout << "ChildList name " << (*it)->getName() << "\n";
 		(*it)->setTransformation(translate);
 	}
-
+#endif
 }
 
 void sceneGraph::displayScene() {

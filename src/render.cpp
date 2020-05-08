@@ -113,14 +113,16 @@ void render::initRender(int width, int height, ply_parser *parser) {
 	SCR_HEIGHT = height;
 	glEnable(GL_DEPTH_TEST);
 	landGraph->setShaderProgramId(sphereProgramId);
-	graphList.push_back(landGraph);
+	//graphList.push_back(landGraph);
 
 	// Create Parash
 	//sceneNode *sphereNode = new sceneNode("Sphere", glm::vec3(0.005f, 0.005f, 0.005f), glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneNode *sphereNode = new sceneNode("Sphere");
-	sphereNode->loadMeshObj("data/sphere.ply");
+	sphereNode->loadMeshObj(transparentVertices, sizeof(transparentVertices)/sizeof(float));
+	//sphereNode->loadMeshObj("data/sphere.ply");
 	sphereNode->material.loadTexture("data/earth.png");
-	sphereNode->setScale(glm::vec3(0.005f, 0.005f, 0.005f));
+	sphereNode->setScale(glm::vec3(1.005f, 1.002f, 1.005f));
+	//sphereNode->setScale(glm::vec3(0.5f, 0.2f, 0.5f));
 	sphereNode->setTransformation(glm::vec3(-0.6f, 1.0f, 0.0f));
 
 	sceneGraph *parachuteGraph = new sceneGraph(sphereNode, "Parachute");
@@ -130,8 +132,9 @@ void render::initRender(int width, int height, ply_parser *parser) {
 	sceneNode *basketNode = new sceneNode("Basket");
 	parachuteGraph->addChild(basketNode);
 	basketNode->loadMeshObj(transparentVertices, sizeof(transparentVertices)/sizeof(float));
+	//basketNode->loadMeshObj("data/sphere.ply");
 	basketNode->material.loadTexture("data/container2.png");
-	basketNode->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+	basketNode->setScale(glm::vec3(1.02f, 1.02f, 1.02f));
 	basketNode->setTransformation(glm::vec3(-0.3f, -0.7f, 0.0f));
 
 	parachuteGraph->setShaderProgramId(sphereProgramId);
