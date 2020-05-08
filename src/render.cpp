@@ -70,13 +70,21 @@ render::~render() {
 	glDeleteProgram(sphereProgramId);
 	for (int i = 0; i < graphList.size(); i++)
 		delete graphList[i];
+	delete camera;
 }
 
 void render::initRender(int width, int height, ply_parser *parser) {
 
 	//Camera
-	Camera *camera = new Camera(glm::vec3(1.0f, 1.0f, 5.0f), "Camera_1", height, width);
+	camera = new Camera(glm::vec3(1.0f, 1.0f, 5.0f), "Camera_1", height, width);
 	//Create Parent node
+	Material *grassMaterial = new Material();
+	grassMaterial->loadTexture("data/grass.png");
+	unsigned int shaderId = grassMaterial->loadShaderFile("data/3.1.blending.vs", "data/3.1.blending.fs");
+
+	Material *metalMaterial = new Material(shaderId);
+	metalMaterial->loadTexture("data/metal.png");
+
 	sceneNode *landNode = new sceneNode("Land");
 	float planeVertices[] = {
 		// positions          // texture Coords 
@@ -89,9 +97,8 @@ void render::initRender(int width, int height, ply_parser *parser) {
 		5.0f, -0.5f, -5.0f,  2.0f, 2.0f
 	};
 	landNode->loadMeshObj(planeVertices, sizeof(planeVertices)/sizeof(float));
-	landNode->material.loadTexture("data/metal.png");
-	sceneGraph *landGraph = new sceneGraph(landNode, "LandGraph");
-	landGraph->init(camera);
+	landNode->setMaterial(metalMaterial);
+
 
 	sceneNode *grassNode = new sceneNode("Grass");
 	float transparentVertices[] = {
@@ -105,47 +112,52 @@ void render::initRender(int width, int height, ply_parser *parser) {
 		1.0f,  0.5f,  0.0f,  1.0f,  0.0f
 	};
 	grassNode->loadMeshObj(transparentVertices, sizeof(transparentVertices)/sizeof(float));
-	grassNode->material.loadTexture("data/grass.png");
-	landGraph->addChild(grassNode);
+	grassNode->setMaterial(grassMaterial);
 
-	sphereProgramId = LoadShaders("data/3.1.blending.vs", "data/3.1.blending.fs");
+	landNode->addChild(grassNode);
+
+	// Parent node list
+	graphList.push_back(landNode);
+
 	SCR_WIDTH = width;
 	SCR_HEIGHT = height;
 	glEnable(GL_DEPTH_TEST);
-	landGraph->setShaderProgramId(sphereProgramId);
-	//graphList.push_back(landGraph);
 
 	// Create Parash
 	//sceneNode *sphereNode = new sceneNode("Sphere", glm::vec3(0.005f, 0.005f, 0.005f), glm::vec3(0.0f, 1.0f, 0.0f));
+	Material *sphereMaterial = new Material(shaderId);
+	sphereMaterial->loadTexture("data/earth.png");
+
+	Material *basketMaterial = new Material(shaderId);
+	basketMaterial->loadTexture("data/container2.png");
+
 	sceneNode *sphereNode = new sceneNode("Sphere");
+	sphereNode->setMaterial(sphereMaterial);
 	sphereNode->loadMeshObj(transparentVertices, sizeof(transparentVertices)/sizeof(float));
 	//sphereNode->loadMeshObj("data/sphere.ply");
-	sphereNode->material.loadTexture("data/earth.png");
 	sphereNode->setScale(glm::vec3(1.005f, 1.002f, 1.005f));
 	//sphereNode->setScale(glm::vec3(0.5f, 0.2f, 0.5f));
-	sphereNode->setTransformation(glm::vec3(-0.6f, 1.0f, 0.0f));
+	sphereNode->setPosition(glm::vec3(-0.6f, 1.0f, 0.0f));
 
-	sceneGraph *parachuteGraph = new sceneGraph(sphereNode, "Parachute");
-	parachuteGraph->init(camera);
-	
 	//sceneNode *basketNode = new sceneNode("Basket", glm::vec3(0.2f, 0.2f, 2.2f), glm::vec3(0.0f, -1.5f, 3.0f));
 	sceneNode *basketNode = new sceneNode("Basket");
-	parachuteGraph->addChild(basketNode);
 	basketNode->loadMeshObj(transparentVertices, sizeof(transparentVertices)/sizeof(float));
 	//basketNode->loadMeshObj("data/sphere.ply");
-	basketNode->material.loadTexture("data/container2.png");
+	basketNode->setMaterial(basketMaterial);
 	basketNode->setScale(glm::vec3(1.02f, 1.02f, 1.02f));
-	basketNode->setTransformation(glm::vec3(-0.3f, -0.7f, 0.0f));
+	basketNode->setPosition(glm::vec3(-0.3f, -0.7f, 0.0f));
 
-	parachuteGraph->setShaderProgramId(sphereProgramId);
-	
-	graphList.push_back(parachuteGraph);
+	sphereNode->addChild(basketNode);
 
+	graphList.push_back(sphereNode);
+
+#if 0
 	// setup
 	for (int i = 0; i < graphList.size(); i++) {
 		graphList[i]->setup();
 	}
-
+#endif
+	camera->setup(shaderId);
 	return;
 }
 
@@ -159,11 +171,11 @@ void render::drawSpheres(rotationAxis axis, objectDirection translate) {
 		if (graphList[i]->getName().compare("Parachute") == 0) {
 			//std::cout << "NAME " << graphList[i]->getName() << "\n";
 			if (translate == MOVE_RIGHT)
-				graphList[i]->update(glm::vec3(0.2f, 0.0f, 0.0f));
+				graphList[i]->setPosition(glm::vec3(0.2f, 0.0f, 0.0f));
 			if (translate == MOVE_LEFT)
-				graphList[i]->update(glm::vec3(-0.2f, 0.0f, 0.0f));
+				graphList[i]->setPosition(glm::vec3(-0.2f, 0.0f, 0.0f));
 		}
-		graphList[i]->displayScene();
+		graphList[i]->displayScene(camera->getProjectionMatrix(), camera->getViewMatrix());
 	}
 }
 

@@ -31,128 +31,78 @@ class Material : public Texture {
 		glm::vec3 diffuse;
 		glm::vec3 specular;
 		float shininess;
+		unsigned int shaderProgramId;
 	public:
 		Material() {
 			ambient = glm::vec3(0.1, 0.1, 0.1),
 			diffuse = glm::vec3(0.8, 0.8, 0.8),
 			specular = glm::vec3(1.0, 1.0, 1.0),
 			shininess = 75.0f;
-		}	
+			shaderProgramId = 0;
+		}
+		Material(unsigned int shaderId) {
+			shaderProgramId = shaderId;
+		}
+		~Material();
+		unsigned int loadShaderFile(std::string vs, std::string fs);
+		unsigned int getShaderId();
+		void setShaderId(unsigned int id);
 };
 
 class Camera {
 private:
-	glm::vec3 position;
-	std::string name;
-	glm::mat4 projectionMatrix;
-	glm::mat4 viewMatrix;
-	bool isSetup;
+	glm::vec3 _position;
+	std::string _name;
+	glm::mat4 _projectionMatrix;
+	glm::mat4 _viewMatrix;
+	bool _isSetup;
 public:
 	Camera(glm::vec3 location, std::string name, unsigned int scrHeight, unsigned int scrWidth);
 
 	void setup(unsigned int id);
-	void setPosition(glm::vec3 location) {
-		position = location;
-	}
-	glm::vec3 getPosition() {
-		return position;
-	}
-	void setProjectionMatix(glm::mat4 matrix) {
-		projectionMatrix = matrix;
-	}
-	void setViewMatrix(glm::mat4 matrix) {
-		viewMatrix = matrix;
-	}
-	glm::mat4 getProjectionMatrix() {
-		return projectionMatrix;
-	}
-	glm::mat4 getViewMatrix() {
-		return viewMatrix;
-	}
+	void setPosition(glm::vec3 location);
+	glm::vec3 getPosition();
+	void setProjectionMatix(glm::mat4 matrix);
+	void setViewMatrix(glm::mat4 matrix);
+	glm::mat4 getProjectionMatrix();
+	glm::mat4 getViewMatrix();
 };
 
-class sceneNode {
+class sceneRender {
 private:
-	ply_parser plyData;
-	std::string name;
-	glm::mat4 localMatrix;
-	glm::mat4 worldMatrix;
-	glm::mat4 modelMatrix;
-	glm::vec3 scale;
-	glm::vec3 translate;
-	sceneNode *parent;
-	unsigned vertexArrayObject, vertexBufferObject;
-	vector<float> vertices;
+	ply_parser _plyData;
+	unsigned int _vertexArrayObject, _vertexBufferObject;
+	vector<float> _vertices;
+	// Add ref count for material
+	Material *_material;
 public:
-	Material material;
-	sceneNode(std::string objName) {
-		name = objName;
-		modelMatrix = glm::mat4(1);
-		localMatrix = glm::mat4(1);
-		worldMatrix = glm::mat4(1);
-		scale = glm::vec3(1.0f);
-		translate = glm::vec3(0.0f);
-		parent = NULL;
-	}
-	sceneNode(std::string objName, glm::vec3 scale, glm::vec3 translate);
-	~sceneNode();
-	inline void setParent(sceneNode *node) {
-		parent = node;
-	}
-	inline std::string getName() {
-		return name;
-	}
-	void init();
-	void setup();
+	sceneRender();
+	virtual ~sceneRender();
+	void draw(glm::mat4 worldMatrix);
 	void loadMeshObj(const char *plyFilePath);
-	void loadMeshObj(float *vertexs, int size);
-	void setMaterial(Material value);
-	void setTransformation(glm::vec3 translation);
-	void setTransformation(glm::mat4 matrix);
+	void loadMeshObj(float *vertices, int size);
+	void setMaterial(Material *mat);
+	Material *getMaterial();
+};
+
+class sceneNode : public sceneRender {
+private:
+	std::string _name;
+	glm::mat4 _localMatrix, _worldMatrix;
+	glm::vec3 _scale, _position, _axis;
+	float _rotateAngle;
+	sceneNode *_parent;
+	vector<sceneNode*> _childList;
+public:
+	sceneNode(std::string objName);
+	~sceneNode();
+	void addChild(sceneNode *node);
+	void setPosition(glm::vec3 position);
 	void setScale(glm::vec3 scale);
 	void setRotation(float radians, glm::vec3 axis);
-	void draw(unsigned int shaderProgramId);
-	glm::mat4 getModelMatrix() {
-		return modelMatrix;
-	}
-	glm::mat4 getLocalMatrix() {
-		return localMatrix;
-	}
-	glm::mat4 getWorldMatrix() {
-		return worldMatrix;
-	}
+	glm::mat4 getLocalMatrix();
+	glm::mat4 getWorldMatrix();
+	void displayScene(glm::mat4 projectionMatrix, glm::mat4 viewMatrix);
+	std::string getName();
 };
-
-class sceneGraph {
-private:
-	// make sure parent always at 0 index
-	vector<sceneNode*> childList;
-	std::string name;
-	Camera *camera;
-	unsigned int shaderProgramId;
-public:
-	sceneGraph(sceneNode *parent, std::string name) {
-		childList.push_back(parent);
-		parent->setParent(NULL);
-		this->name = name;
-	}
-	~sceneGraph();
-	void setShaderProgramId(unsigned int id) {
-		shaderProgramId = id;
-	}
-	// Init project matrix and view matrix
-	void init(Camera *camera);
-
-	void addChild(sceneNode *node) {
-		childList.push_back(node);
-		node->setParent(childList[0]);
-	}
-	inline std::string getName() {
-		return name;
-	}
-	void setup();
-	void displayScene();
-	void update(glm::vec3 translate);
-};
-
 #endif

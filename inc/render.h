@@ -49,7 +49,8 @@ class render {
 		Texture texture;
 		unsigned int planeVertexBufferObject, grassVertexBufferObject, planeVertexArrayObject, grassVertexArrayObject;
 		GLuint LoadShaders(const char *vert_file, const char *frag_file);
-		vector<sceneGraph*> graphList;
+		vector<sceneNode*> graphList;
+		Camera *camera;
 	public:
 		render();
 		~render();
