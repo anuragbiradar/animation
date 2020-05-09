@@ -26,6 +26,7 @@ class window_mgmt {
 		uint8_t parse_top;
 		ply_parser *parser[10];
 		render render_obj;
+		float deltaTime, lastFrame;
 	public:
 		window_mgmt();
 		void window_set_ply_object(ply_parser *parser);
@@ -91,9 +92,17 @@ int window_mgmt::window_mainloop_init() {
 void window_mgmt::window_mainloop_run() {
 	while(!glfwWindowShouldClose(mainWindow))
   	{
+		float currentFrame = glfwGetTime();
+        	deltaTime = currentFrame - lastFrame;
+        	lastFrame = currentFrame;
+		std::cout << "Delta " << deltaTime << "\n";
+		if (deltaTime < 0.02f)
+			continue;
+
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//render_obj.drawCubeTexture();
+		translate = MOVE_LEFT;
 		render_obj.drawSpheres(axis, translate);
 		translate = MOVE_INVALID;
 		axis = ROTATE_INVALID;

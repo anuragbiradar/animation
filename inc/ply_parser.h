@@ -43,6 +43,7 @@ class ply_parser {
 		GLfloat *element_face_points;
 		uint32_t total_vertices;
 		uint32_t total_faces;
+		vector<float> vertex;
 		void cross_product(point *a, point *b, point *result);
 		void calculateNormal(point *coord1, point *coord2, point *coord3, point *result);
 
@@ -50,8 +51,10 @@ class ply_parser {
 		ply_parser();
 		~ply_parser();
 		void load_ply(const char *file_path);
+		void load_vert(const char *file_path);
 		uint32_t get_element_face_size();
 		vector<point> get_element_face_points();
 		vector<point> get_normal_vector();
+		vector<float> get_vertex();
 };
 #endif

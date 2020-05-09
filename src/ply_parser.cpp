@@ -104,6 +104,25 @@ void ply_parser::load_ply(const char *file_path) {
 	}
 }
 
+void ply_parser::load_vert(const char *file_path) {
+	if (file_path == NULL)
+		return;
+	std::ifstream file(file_path);
+	if (!file.is_open())
+		std::cout << "Failed to open file " << file_path << std::endl;
+	string str;
+	/* Parse Header */
+	while (getline(file, str)) {
+		cout << "Line: " << str << endl;
+		const char *line = str.c_str();
+		float v1,v2,v3;
+		sscanf(line, "%f %f %f",&v1, &v2, &v3);
+		vertex.push_back(v1);
+		vertex.push_back(v2);
+		vertex.push_back(v3);
+	}
+}
+
 uint32_t ply_parser::get_element_face_size() {
 	return this->total_faces;
 }
@@ -114,4 +133,8 @@ vector<point> ply_parser::get_element_face_points() {
 
 vector<point> ply_parser::get_normal_vector() {
 	return this->normal;
+}
+
+vector<float> ply_parser::get_vertex() {
+	return vertex;
 }

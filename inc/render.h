@@ -35,31 +35,15 @@ class render {
 	private:
 		uint32_t SCR_WIDTH;
 		uint32_t SCR_HEIGHT;
-		GLuint sphereProgramId;
-		unsigned int sphereVertexBufferObject, sphereVertexArrayObject;
-		vector<point> points;
-		vector<GLfloat> vertex;
-		glm::mat4 projectionMatrix1;
-		glm::mat4 viewMatrix1;
-		float moveObject;
-		rotationAxis prev_axis;
-		unsigned int diffuseMap, diffuseMapSphere;
-		unsigned int floorTexture;
-		unsigned int transparentTexture;
-		Texture texture;
-		unsigned int planeVertexBufferObject, grassVertexBufferObject, planeVertexArrayObject, grassVertexArrayObject;
-		GLuint LoadShaders(const char *vert_file, const char *frag_file);
+		//GLuint sphereProgramId;
+		//Texture texture;
 		vector<sceneNode*> graphList;
 		Camera *camera;
 	public:
 		render();
 		~render();
 		void initRender(int width, int height, ply_parser *parser);
-		void setView1();
 		void drawSphere(int sphereIndex, objectAttributes attr);
-		void drawFloor();
-		void drawGrass();
 		void drawSpheres(rotationAxis axis, objectDirection translate);
-		//unsigned int loadTexture(char const * path);
 };
 #endif

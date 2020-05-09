@@ -78,9 +78,10 @@ private:
 public:
 	sceneRender();
 	virtual ~sceneRender();
-	void draw(glm::mat4 worldMatrix);
+	void draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, glm::mat4 worldMatrix);
 	void loadMeshObj(const char *plyFilePath);
 	void loadMeshObj(float *vertices, int size);
+	void loadMeshObjVert(const char *vertFilePath);
 	void setMaterial(Material *mat);
 	Material *getMaterial();
 };
