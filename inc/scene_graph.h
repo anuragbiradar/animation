@@ -101,6 +101,7 @@ public:
 	void setPosition(glm::vec3 position);
 	void setScale(glm::vec3 scale);
 	void setRotation(float radians, glm::vec3 axis);
+	glm::vec3 getScale();
 	glm::mat4 getLocalMatrix();
 	glm::mat4 getWorldMatrix();
 	void displayScene(glm::mat4 projectionMatrix, glm::mat4 viewMatrix);

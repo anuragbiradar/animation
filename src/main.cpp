@@ -27,6 +27,7 @@ class window_mgmt {
 		ply_parser *parser[10];
 		render render_obj;
 		float deltaTime, lastFrame;
+		objectStatusUpdate update;
 	public:
 		window_mgmt();
 		void window_set_ply_object(ply_parser *parser);
@@ -42,6 +43,7 @@ window_mgmt::window_mgmt() {
 	axis = ROTATE_INVALID;
 	parse_top = 0;
 	mesh_object = MESH_OBJECT_1;
+	update.isUpdated = false;
 }
 
 void window_mgmt::window_set_ply_object(ply_parser *parser_obj) {
@@ -103,8 +105,9 @@ void window_mgmt::window_mainloop_run() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//render_obj.drawCubeTexture();
 		translate = MOVE_RIGHT;
-		render_obj.drawSpheres(axis, translate);
+		render_obj.drawSpheres(axis, translate, update);
 		translate = MOVE_INVALID;
+		update.isUpdated = false;
 		axis = ROTATE_INVALID;
 		glfwSwapBuffers(mainWindow);
 		glfwPollEvents();
@@ -113,6 +116,7 @@ void window_mgmt::window_mainloop_run() {
 }
 
 void window_mgmt::window_handle_event(int key, int code, int action, int mode) {
+	update.isUpdated = true;
 	if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
 		translate = MOVE_LEFT;
 	} else if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
@@ -127,6 +131,12 @@ void window_mgmt::window_handle_event(int key, int code, int action, int mode) {
 		axis = ROTATE_Y;
 	} else if (key == 'Z' && action == GLFW_PRESS) {
 		axis = ROTATE_Z;
+	} else if (key == 'C' && action == GLFW_PRESS) {
+		update.objName = "Camera_1";
+	} else if (key == 'V' && action == GLFW_PRESS) {
+		update.objName = "Camera_2";
+	} else {
+		update.isUpdated = false;
 	}
 }
 

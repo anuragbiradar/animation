@@ -113,7 +113,7 @@ void ply_parser::load_vert(const char *file_path) {
 	string str;
 	/* Parse Header */
 	while (getline(file, str)) {
-		cout << "Line: " << str << endl;
+		//cout << "Line: " << str << endl;
 		const char *line = str.c_str();
 		float v1,v2,v3;
 		sscanf(line, "%f %f %f",&v1, &v2, &v3);

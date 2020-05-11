@@ -180,10 +180,14 @@ sceneNode::~sceneNode() {
 	}
 }
 
+glm::vec3 sceneNode::getScale() {
+	return _scale;
+}
+
 void sceneNode::setPosition(glm::vec3 translation) {
 	_position += translation;
 	_localMatrix = glm::mat4(1);
-	std::cout << "SetPosition " << _name << " vvalue " << glm::to_string(_position) << std::endl;
+	//std::cout << "SetPosition " << _name << " vvalue " << glm::to_string(_position) << std::endl;
 	_localMatrix = glm::scale(_localMatrix, _scale);
 	_localMatrix = glm::translate(_localMatrix, _position);
 }

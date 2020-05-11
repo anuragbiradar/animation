@@ -15,6 +15,8 @@ using namespace std;
 
 glm::vec3 cameraPosition1(1.0f, 1.0f, 3.0f); 
 
+static Camera *cameraObj;
+
 glm::vec3 positions[] = {
 	glm::vec3(10.0f, 10.0f, -40.3f),
 	glm::vec3(10.0f, 10.0f, -40.3f),
@@ -70,6 +72,7 @@ void render::initRender(int width, int height, ply_parser *parser) {
 
 	//Camera
 	camera = new Camera(glm::vec3(1.0f, 1.0f, 5.0f), "Camera_1", height, width);
+	camera1 = new Camera(glm::vec3(1.0f, 1.0f, -5.0f), "Camera_2", height, width);
 	//Create Parent node
 	Material *grassMaterial = new Material();
 	grassMaterial->loadTexture("data/grass.png");
@@ -122,7 +125,7 @@ void render::initRender(int width, int height, ply_parser *parser) {
 	sphereMaterial->loadTexture("data/air.jpg");
 
 	Material *basketMaterial = new Material(shaderId);
-	basketMaterial->loadTexture("data/container2.png");
+	basketMaterial->loadTexture("data/basket.jpg");
 
 	sceneNode *sphereNode = new sceneNode("Sphere");
 	sphereNode->setMaterial(sphereMaterial);
@@ -149,6 +152,30 @@ void render::initRender(int width, int height, ply_parser *parser) {
 	graphList.push_back(sphereNode);
 //	graphList.push_back(basketNode);
 
+	Material *antMaterial = new Material(shaderId);
+	antMaterial->loadTexture("data/ant.jpg");
+	sceneNode *antNode = new sceneNode("Ant");
+	antNode->loadMeshObj("data/ant.ply");
+	antNode->setMaterial(antMaterial);
+	antNode->setScale(glm::vec3(0.005f));
+	antNode->setPosition(glm::vec3(3.0f, 2.25f, 0.0f));
+
+
+	sceneNode *antNode1 = new sceneNode("Ant1");
+	antNode1->loadMeshObj("data/ant.ply");
+	antNode1->setMaterial(antMaterial);
+	antNode1->setPosition(glm::vec3(15.90f, 2.25f, -3.0f));
+
+	sceneNode *antNode2 = new sceneNode("Ant2");
+	antNode2->loadMeshObj("data/ant.ply");
+	antNode2->setMaterial(antMaterial);
+	antNode2->setPosition(glm::vec3(25.50f, 2.25f, 0.0f));
+
+	antNode->addChild(antNode1);
+	antNode->addChild(antNode2);
+
+	graphList.push_back(antNode);
+
 #if 0
 	// setup
 	for (int i = 0; i < graphList.size(); i++) {
@@ -156,18 +183,29 @@ void render::initRender(int width, int height, ply_parser *parser) {
 	}
 #endif
 	camera->setup(shaderId);
+	camera1->setup(shaderId);
+	cameraObj = camera;
 	return;
 }
 
-void render::drawSpheres(rotationAxis axis, objectDirection translate) {
+void render::drawSpheres(rotationAxis axis, objectDirection translate, objectStatusUpdate update) {
 
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
+	if (update.isUpdated == true) {
+
+		if (update.objName.compare("Camera_1") == 0)
+			cameraObj = camera;
+		else if (update.objName.compare("Camera_2") == 0)
+			cameraObj = camera1;
+
+	}
 	for (int i = 0; i < graphList.size(); i++)
 	{
 		if (graphList[i]->getName().compare("Sphere") == 0 || graphList[i]->getName().compare("Basket") == 0) {
 			//std::cout << "NAME " << graphList[i]->getName() << "\n";
+			glm::vec3 scale = graphList[i]->getScale() + glm::vec3(0.0005);
+			graphList[i]->setScale(scale);
 			if (translate == MOVE_RIGHT)
 				graphList[i]->setPosition(glm::vec3(0.005f, 0.0f, 0.0f));
 			if (translate == MOVE_LEFT)
@@ -177,6 +215,9 @@ void render::drawSpheres(rotationAxis axis, objectDirection translate) {
 			if (translate == MOVE_DOWN)
 				graphList[i]->setPosition(glm::vec3(0.0f, -0.005f, 0.0f));
 		}
-		graphList[i]->displayScene(camera->getProjectionMatrix(), camera->getViewMatrix());
+		if (graphList[i]->getName().compare("Ant") == 0) {
+			graphList[i]->setPosition(glm::vec3(0.0f, 0.0f, 0.5f));
+		}
+		graphList[i]->displayScene(cameraObj->getProjectionMatrix(), cameraObj->getViewMatrix());
 	}
 }

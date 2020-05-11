@@ -31,6 +31,22 @@ typedef struct _objectAttributes {
 	int lightPositionIndex;
 } objectAttributes;
 
+typedef enum _objectOperation {
+	OBJECT_ROTATE = 0x01,
+	OBJECT_SCALE = 0x02,
+	OBJECT_POSITION = 0x04,
+} objectOperation;
+
+typedef struct _objectStatusUpdate {
+	std::string objName;
+	bool isUpdated;
+	objectOperation operation;
+	glm::vec3 position;
+	float scale;
+	float radian;
+	rotationAxis axis;
+} objectStatusUpdate;
+
 class render {
 	private:
 		uint32_t SCR_WIDTH;
@@ -39,11 +55,12 @@ class render {
 		//Texture texture;
 		vector<sceneNode*> graphList;
 		Camera *camera;
+		Camera *camera1;
 	public:
 		render();
 		~render();
 		void initRender(int width, int height, ply_parser *parser);
 		void drawSphere(int sphereIndex, objectAttributes attr);
-		void drawSpheres(rotationAxis axis, objectDirection translate);
+		void drawSpheres(rotationAxis axis, objectDirection translate, objectStatusUpdate update);
 };
 #endif
