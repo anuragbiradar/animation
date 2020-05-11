@@ -95,14 +95,14 @@ void window_mgmt::window_mainloop_run() {
 		float currentFrame = glfwGetTime();
         	deltaTime = currentFrame - lastFrame;
         	lastFrame = currentFrame;
-		std::cout << "Delta " << deltaTime << "\n";
-		if (deltaTime < 0.02f)
+		//std::cout << "Delta " << deltaTime << "\n";
+		if (deltaTime < 0.01f)
 			continue;
 
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//render_obj.drawCubeTexture();
-		translate = MOVE_LEFT;
+		translate = MOVE_RIGHT;
 		render_obj.drawSpheres(axis, translate);
 		translate = MOVE_INVALID;
 		axis = ROTATE_INVALID;

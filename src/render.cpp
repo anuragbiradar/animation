@@ -119,7 +119,7 @@ void render::initRender(int width, int height, ply_parser *parser) {
 	// Create Parash
 	//sceneNode *sphereNode = new sceneNode("Sphere", glm::vec3(0.005f, 0.005f, 0.005f), glm::vec3(0.0f, 1.0f, 0.0f));
 	Material *sphereMaterial = new Material(shaderId);
-	sphereMaterial->loadTexture("data/earth.png");
+	sphereMaterial->loadTexture("data/air.jpg");
 
 	Material *basketMaterial = new Material(shaderId);
 	basketMaterial->loadTexture("data/container2.png");
@@ -132,7 +132,7 @@ void render::initRender(int width, int height, ply_parser *parser) {
 	//sphereNode->setScale(glm::vec3(0.005f, 0.002f, 0.005f));
 	sphereNode->setScale(glm::vec3(0.5f, 0.5f, 0.5f));
 	//sphereNode->setPosition(glm::vec3(-50.10f, 80.0f, 0.0f));
-	sphereNode->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+	sphereNode->setPosition(glm::vec3(-1.0f, 2.0f, 0.0f));
 
 	//sceneNode *basketNode = new sceneNode("Basket", glm::vec3(0.2f, 0.2f, 2.2f), glm::vec3(0.0f, -1.5f, 3.0f));
 	sceneNode *basketNode = new sceneNode("Basket");
@@ -141,13 +141,13 @@ void render::initRender(int width, int height, ply_parser *parser) {
 	basketNode->setMaterial(basketMaterial);
 	//basketNode->setScale(glm::vec3(500.02f, 500.02f, 500.02f));
 	basketNode->setScale(glm::vec3(0.5f));
-	basketNode->setPosition(glm::vec3(0.00f, -2.20f, 0.0f));
+	basketNode->setPosition(glm::vec3(-0.50f, -2.50f, 0.0f));
 
 	sphereNode->addChild(basketNode);
 	//basketNode->addChild(sphereNode);
 
 	graphList.push_back(sphereNode);
-	//graphList.push_back(basketNode);
+//	graphList.push_back(basketNode);
 
 #if 0
 	// setup
@@ -169,13 +169,13 @@ void render::drawSpheres(rotationAxis axis, objectDirection translate) {
 		if (graphList[i]->getName().compare("Sphere") == 0 || graphList[i]->getName().compare("Basket") == 0) {
 			//std::cout << "NAME " << graphList[i]->getName() << "\n";
 			if (translate == MOVE_RIGHT)
-				graphList[i]->setPosition(glm::vec3(0.2f, 0.0f, 0.0f));
+				graphList[i]->setPosition(glm::vec3(0.005f, 0.0f, 0.0f));
 			if (translate == MOVE_LEFT)
-				graphList[i]->setPosition(glm::vec3(-0.2f, 0.0f, 0.0f));
+				graphList[i]->setPosition(glm::vec3(-0.005f, 0.0f, 0.0f));
 			if (translate == MOVE_UP)
-				graphList[i]->setPosition(glm::vec3(0.0f, 0.5f, 0.0f));
+				graphList[i]->setPosition(glm::vec3(0.0f, 0.005f, 0.0f));
 			if (translate == MOVE_DOWN)
-				graphList[i]->setPosition(glm::vec3(0.0f, -0.5f, 0.0f));
+				graphList[i]->setPosition(glm::vec3(0.0f, -0.005f, 0.0f));
 		}
 		graphList[i]->displayScene(camera->getProjectionMatrix(), camera->getViewMatrix());
 	}
