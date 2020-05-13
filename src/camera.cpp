@@ -13,6 +13,7 @@ Camera::Camera(glm::vec3 position, std::string name, unsigned int scrHeight, uns
 	_position = position;
 	_name = name;
 	_isSetup = false;
+	_lightPos0 = glm::vec3(10.0f, 18.0f, 0.0f);
 	_viewMatrix = glm::lookAt(
 			position, // Camera is at (4,3,3), in World Space
 			glm::vec3(0,0,0), // and looks at the origin
@@ -29,23 +30,41 @@ void Camera::setup(unsigned int shaderProgramId) {
 	glUniformMatrix4fv(viewID, 1, GL_FALSE, &_viewMatrix[0][0]);
 	GLuint projectionID = glGetUniformLocation(shaderProgramId, "projection");
 	glUniformMatrix4fv(projectionID, 1, GL_FALSE, &_projectionMatrix[0][0]);
+	unsigned int lightPos0Id = glGetUniformLocation(shaderProgramId, "ligPos0");
+	glUniform3fv(lightPos0Id, 1, &_lightPos0[0]);
+	unsigned int cameraPositionId = glGetUniformLocation(shaderProgramId, "cameraPosition");
+	glUniform3fv(cameraPositionId, 1, &_position[0]);
 	_isSetup = true;
 }
+
 void Camera::setPosition(glm::vec3 location) {
 	_position = location;
 }
+
+void Camera::setLightPos0(glm::vec3 position) {
+	_lightPos0 = position;
+}
+
+glm::vec3 Camera::getLightPos0() {
+	return _lightPos0;
+}
+
 glm::vec3 Camera::getPosition() {
 	return _position;
 }
+
 void Camera::setProjectionMatix(glm::mat4 matrix) {
 	_projectionMatrix = matrix;
 }
+
 void Camera::setViewMatrix(glm::mat4 matrix) {
 	_viewMatrix = matrix;
 }
+
 glm::mat4 Camera::getProjectionMatrix() {
 	return _projectionMatrix;
 }
+
 glm::mat4 Camera::getViewMatrix() {
 	return _viewMatrix;
 }

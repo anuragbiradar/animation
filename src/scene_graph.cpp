@@ -142,7 +142,7 @@ Material* sceneRender::getMaterial() {
 	return _material;
 }
 
-void sceneRender::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, glm::mat4 worldMatrix) {
+void sceneRender::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, glm::mat4 worldMatrix, glm::vec3 ligPos0) {
 	if (!_material) {
 		std::cout << "Material is not for this object\n";
 		return;
@@ -155,6 +155,8 @@ void sceneRender::draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, glm::ma
 	glUniformMatrix4fv(projectionID, 1, GL_FALSE, &projectionMatrix[0][0]);
 	unsigned modelID = glGetUniformLocation(shaderProgramId, "model");
 	glUniformMatrix4fv(modelID, 1, GL_FALSE, &worldMatrix[0][0]);
+	unsigned ligPos0ID = glGetUniformLocation(shaderProgramId, "ligPos0");
+	glUniform3fv(ligPos0ID, 1, &ligPos0[0]);
 	unsigned int textureID  = glGetUniformLocation(shaderProgramId, "myTextureSampler");
 	glUniform1i(textureID, 0);
 
@@ -221,7 +223,7 @@ void sceneNode::addChild(sceneNode *node) {
 	node->_parent = this;
 }
 
-void sceneNode::displayScene(glm::mat4 projectionMatrix, glm::mat4 viewMatrix) {
+void sceneNode::displayScene(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, glm::vec3 ligPos0) {
 	//std::cout << "Draw object " << name << "\n";
 	if (_parent) {
 		_worldMatrix = _parent->getWorldMatrix() * _localMatrix;
@@ -231,11 +233,11 @@ void sceneNode::displayScene(glm::mat4 projectionMatrix, glm::mat4 viewMatrix) {
 	Material *_mat = getMaterial();
 
 	//std::cout << "Draw " << _name << std::endl;
-	draw(projectionMatrix, viewMatrix, _worldMatrix);
+	draw(projectionMatrix, viewMatrix, _worldMatrix, ligPos0);
 	
 	vector<sceneNode*>::iterator it;
 	for (it = _childList.begin(); it != _childList.end(); it++) {
-		(*it)->displayScene(projectionMatrix, viewMatrix);
+		(*it)->displayScene(projectionMatrix, viewMatrix, ligPos0);
 	}
 }
 

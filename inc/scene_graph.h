@@ -56,6 +56,7 @@ private:
 	glm::mat4 _projectionMatrix;
 	glm::mat4 _viewMatrix;
 	bool _isSetup;
+	glm::vec3 _lightPos0;
 public:
 	Camera(glm::vec3 location, std::string name, unsigned int scrHeight, unsigned int scrWidth);
 
@@ -64,6 +65,8 @@ public:
 	glm::vec3 getPosition();
 	void setProjectionMatix(glm::mat4 matrix);
 	void setViewMatrix(glm::mat4 matrix);
+	void setLightPos0(glm::vec3 position);
+	glm::vec3 getLightPos0();
 	glm::mat4 getProjectionMatrix();
 	glm::mat4 getViewMatrix();
 };
@@ -78,7 +81,7 @@ private:
 public:
 	sceneRender();
 	virtual ~sceneRender();
-	void draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, glm::mat4 worldMatrix);
+	void draw(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, glm::mat4 worldMatrix, glm::vec3 ligPos0);
 	void loadMeshObj(const char *plyFilePath);
 	void loadMeshObj(float *vertices, int size);
 	void loadMeshObjVert(const char *vertFilePath);
@@ -104,7 +107,7 @@ public:
 	glm::vec3 getScale();
 	glm::mat4 getLocalMatrix();
 	glm::mat4 getWorldMatrix();
-	void displayScene(glm::mat4 projectionMatrix, glm::mat4 viewMatrix);
+	void displayScene(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, glm::vec3 ligPos0);
 	std::string getName();
 };
 #endif

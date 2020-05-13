@@ -228,7 +228,9 @@ void render::initRender(int width, int height, ply_parser *parser) {
 
 	graphList.push_back(moonNode);
 	camera->setup(shaderId);
+	camera->setLightPos0(glm::vec3(-20.0f, 10.25f, 0.0f));
 	camera1->setup(shaderId);
+	camera1->setLightPos0(glm::vec3(0.0f, 0.25f, 0.0f));
 	cameraObj = camera;
 	return;
 }
@@ -238,7 +240,6 @@ void render::drawSpheres(rotationAxis axis, objectDirection translate, objectSta
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	if (update.isUpdated == true) {
-
 		if (update.objName.compare("Camera_1") == 0)
 			cameraObj = camera;
 		else if (update.objName.compare("Camera_2") == 0)
@@ -266,6 +267,6 @@ void render::drawSpheres(rotationAxis axis, objectDirection translate, objectSta
 		if (graphList[i]->getName().compare("AntG2") == 0) {
 			graphList[i]->setPosition(glm::vec3(0.0f, 0.0f, -0.5f));
 		}
-		graphList[i]->displayScene(cameraObj->getProjectionMatrix(), cameraObj->getViewMatrix());
+		graphList[i]->displayScene(cameraObj->getProjectionMatrix(), cameraObj->getViewMatrix(), cameraObj->getLightPos0());
 	}
 }
