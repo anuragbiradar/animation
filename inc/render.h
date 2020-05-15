@@ -56,6 +56,7 @@ class render {
 		vector<sceneNode*> graphList;
 		Camera *camera;
 		Camera *camera1;
+		renderEnv *env;
 		vector<Material*> materialList;
 	public:
 		render();

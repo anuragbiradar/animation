@@ -13,7 +13,7 @@ Camera::Camera(glm::vec3 position, std::string name, unsigned int scrHeight, uns
 	_position = position;
 	_name = name;
 	_isSetup = false;
-	_lightPos0 = glm::vec3(10.0f, 18.0f, 0.0f);
+	_lightPos0 = glm::vec3(0.0f);
 	_viewMatrix = glm::lookAt(
 			position, // Camera is at (4,3,3), in World Space
 			glm::vec3(0,0,0), // and looks at the origin
@@ -42,7 +42,7 @@ void Camera::setPosition(glm::vec3 location) {
 }
 
 void Camera::setLightPos0(glm::vec3 position) {
-	_lightPos0 = position;
+	_lightPos0 += position;
 }
 
 glm::vec3 Camera::getLightPos0() {
@@ -67,4 +67,25 @@ glm::mat4 Camera::getProjectionMatrix() {
 
 glm::mat4 Camera::getViewMatrix() {
 	return _viewMatrix;
+}
+
+renderEnv::renderEnv(glm::vec3 position0, glm::vec3 position1) {
+	_lightPos0 = position0;
+	_lightPos1 = position1;
+}
+
+glm::vec3 renderEnv::getLightPos0() {
+	return _lightPos0;
+}
+
+glm::vec3 renderEnv::getLightPos1() {
+	return _lightPos1;
+}
+
+void renderEnv::setLightPos0(glm::vec3 position) {
+	_lightPos0 = position;
+}
+
+void renderEnv::setLightPos1(glm::vec3 position) {
+	_lightPos1 = position;
 }

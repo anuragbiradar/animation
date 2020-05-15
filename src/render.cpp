@@ -69,6 +69,7 @@ render::~render() {
 		delete materialList[i];
 	delete camera;
 	delete camera1;
+	delete env;
 }
 
 void render::initRender(int width, int height, ply_parser *parser) {
@@ -76,6 +77,7 @@ void render::initRender(int width, int height, ply_parser *parser) {
 	//Camera
 	camera = new Camera(glm::vec3(1.0f, 1.0f, 5.0f), "Camera_1", height, width);
 	camera1 = new Camera(glm::vec3(1.0f, 1.0f, -5.0f), "Camera_2", height, width);
+	env = new renderEnv(glm::vec3(-20.0f, 10.25f, 0.0f), glm::vec3(-20.0f, 10.25f, 0.0f));
 	//Create Parent node
 	Material *grassMaterial = new Material();
 	grassMaterial->loadTexture("data/grass.png");
@@ -210,27 +212,31 @@ void render::initRender(int width, int height, ply_parser *parser) {
 	graphList.push_back(antGroupNode1);
 	graphList.push_back(antGroupNode2);
 
-#if 0
-	// setup
-	for (int i = 0; i < graphList.size(); i++) {
-		graphList[i]->setup();
-	}
-#endif
-	Material *moonMaterial = new Material(shaderId);
+	//Material *moonMaterial = new Material(shaderId);
+	Material *moonMaterial = new Material();
+	moonMaterial->loadShaderFile("data/lamp.vs", "data/lamp.fs");
 	moonMaterial->loadTexture("data/moon.jpg");
 	materialList.push_back(moonMaterial);
 
 	sceneNode *moonNode = new sceneNode("Moon");
 	moonNode->loadMeshObj("data/sphere.ply");
-	moonNode->setPosition(glm::vec3(-20.0f, 18.25f, 0.0f));
+	moonNode->setPosition(glm::vec3(-25.0f, 18.25f, 0.0f));
 	moonNode->setMaterial(moonMaterial);
 	moonNode->setScale(glm::vec3(0.1f));
 
+	sceneNode *planeNode = new sceneNode("Airplane");
+	planeNode->loadMeshObj("data/airplane.ply");
+	planeNode->setPosition(glm::vec3(20.0f, 18.25f, 0.0f));
+	planeNode->setMaterial(metalMaterial);
+	planeNode->setScale(glm::vec3(0.009f));
+	planeNode->setRotation(170.0f, glm::vec3(1.0f, 0.0f , .0f));
+
 	graphList.push_back(moonNode);
+	graphList.push_back(planeNode);
 	camera->setup(shaderId);
-	camera->setLightPos0(glm::vec3(-20.0f, 10.25f, 0.0f));
+	camera->setLightPos0(glm::vec3(-25.0f, 18.25f, 0.0f));
 	camera1->setup(shaderId);
-	camera1->setLightPos0(glm::vec3(0.0f, 0.25f, 0.0f));
+	camera1->setLightPos0(glm::vec3(-25.0f, 18.25f, 0.0f));
 	cameraObj = camera;
 	return;
 }

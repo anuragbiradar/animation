@@ -71,6 +71,18 @@ public:
 	glm::mat4 getViewMatrix();
 };
 
+class renderEnv {
+private:
+	glm::vec3 _lightPos0;
+	glm::vec3 _lightPos1;
+public:
+	renderEnv(glm::vec3 poistion0, glm::vec3 position1);
+	void setLightPos0(glm::vec3 position);
+	void setLightPos1(glm::vec3 position);
+	glm::vec3 getLightPos0();
+	glm::vec3 getLightPos1();
+};
+
 class sceneRender {
 private:
 	ply_parser _plyData;
