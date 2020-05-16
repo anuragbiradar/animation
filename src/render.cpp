@@ -220,16 +220,20 @@ void render::initRender(int width, int height, ply_parser *parser) {
 
 	sceneNode *moonNode = new sceneNode("Moon");
 	moonNode->loadMeshObj("data/sphere.ply");
+	moonNode->setScale(glm::vec3(0.1f));
 	moonNode->setPosition(glm::vec3(-25.0f, 18.25f, 0.0f));
 	moonNode->setMaterial(moonMaterial);
-	moonNode->setScale(glm::vec3(0.1f));
 
 	sceneNode *planeNode = new sceneNode("Airplane");
 	planeNode->loadMeshObj("data/airplane.ply");
-	planeNode->setPosition(glm::vec3(20.0f, 18.25f, 0.0f));
+	planeNode->setPosition(glm::vec3(220.0f, 55.25f, 0.0f));
 	planeNode->setMaterial(metalMaterial);
 	planeNode->setScale(glm::vec3(0.009f));
-	planeNode->setRotation(170.0f, glm::vec3(1.0f, 0.0f , .0f));
+	planeNode->setRotation(-90.0f, glm::vec3(1.0f, 1.0f , 1.0f));
+	//planeNode->setRotation(-90.0f, glm::vec3(0.0f, 0.0f , 1.0f));
+	/*planeNode->setRotation(90.0f, glm::vec3(0.0f, 0.0f , 1.0f));
+	planeNode->setRotation(90.0f, glm::vec3(0.0f, 1.0f , 0.0f));
+	planeNode->setRotation(90.0f, glm::vec3(0.0f, 0.0f , 1.0f));*/
 
 	graphList.push_back(moonNode);
 	graphList.push_back(planeNode);
@@ -254,6 +258,7 @@ void render::drawSpheres(rotationAxis axis, objectDirection translate, objectSta
 	}
 	for (int i = 0; i < graphList.size(); i++)
 	{
+#if 1
 		if (graphList[i]->getName().compare("Sphere") == 0 || graphList[i]->getName().compare("Basket") == 0) {
 			//std::cout << "NAME " << graphList[i]->getName() << "\n";
 			glm::vec3 scale = graphList[i]->getScale() + glm::vec3(0.0005);
@@ -273,6 +278,12 @@ void render::drawSpheres(rotationAxis axis, objectDirection translate, objectSta
 		if (graphList[i]->getName().compare("AntG2") == 0) {
 			graphList[i]->setPosition(glm::vec3(0.0f, 0.0f, -0.5f));
 		}
+		if (graphList[i]->getName().compare("Airplane") == 0) {
+			graphList[i]->setPosition(glm::vec3(0.0f, 0.0f, 1.0f));
+			graphList[i]->setPosition(glm::vec3(1.0f, 0.0f, 0.0f));
+			//graphList[i]->setRotation(-20.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+		}
+#endif
 		graphList[i]->displayScene(cameraObj->getProjectionMatrix(), cameraObj->getViewMatrix(), cameraObj->getLightPos0());
 	}
 }

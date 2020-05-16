@@ -193,6 +193,10 @@ void sceneNode::setPosition(glm::vec3 translation) {
 	_localMatrix = glm::mat4(1);
 	//std::cout << "SetPosition " << _name << " vvalue " << glm::to_string(_position) << std::endl;
 	_localMatrix = glm::scale(_localMatrix, _scale);
+	if (_rotateAngle != 0) {
+		//std::cout << "Set Rotation\n";
+		_localMatrix = glm::rotate(_localMatrix, _rotateAngle, _axis);
+	}
 	_localMatrix = glm::translate(_localMatrix, _position);
 }
 
