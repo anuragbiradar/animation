@@ -12,30 +12,7 @@
 #include "render.h"
 using namespace std;
 
-
-glm::vec3 cameraPosition1(1.0f, 1.0f, 3.0f); 
-
 static Camera *cameraObj;
-
-glm::vec3 positions[] = {
-	glm::vec3(10.0f, 10.0f, -40.3f),
-	glm::vec3(10.0f, 10.0f, -40.3f),
-};
-
-glm::vec3 spherePosition[] = {
-	// Middle Column Bottom First
-	glm::vec3(0.0f, -2.0f, 0.0f),
-	glm::vec3(0.0f,  0.0f, 0.0f),
-	glm::vec3(0.0f,  2.0f, 0.0f),
-	// Last Column Bottom First
-	glm::vec3(-2.0f, -2.0f, 0.0f),
-	glm::vec3(-2.0f,  0.0f, 0.0f),
-	glm::vec3(-2.0f,  2.0f, 0.0f),
-	// First Column Bottom First
-	glm::vec3(2.0f, -2.0f, 0.0f),
-	glm::vec3(2.0f,  0.0f, 0.0f),
-	glm::vec3(2.0f,  2.0f, 0.0f)
-};
 
 GLenum glCheckError_(const char *file, int line)
 {
@@ -72,7 +49,7 @@ render::~render() {
 	delete env;
 }
 
-void render::initRender(int width, int height, ply_parser *parser) {
+void render::initRender(int width, int height) {
 
 	//Camera
 	camera = new Camera(glm::vec3(1.0f, 1.0f, 5.0f), "Camera_1", height, width);
@@ -89,29 +66,17 @@ void render::initRender(int width, int height, ply_parser *parser) {
 	materialList.push_back(metalMaterial);
 
 	sceneNode *landNode = new sceneNode("Land");
-#if 0
 	float planeVertices[] = {
-		// positions          // texture Coords 
-		5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
-		-5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
-		-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+		// positions            // normals         // texcoords
+		5.0f, -0.5f,  5.0f,  0.0f, 1.0f, 0.0f,  2.0f,  0.0f,
+		-5.0f, -0.5f,  5.0f,  0.0f, 1.0f, 0.0f,   0.0f,  0.0f,
+		-5.0f, -0.5f, -5.0f,  0.0f, 1.0f, 0.0f,   0.0f, 2.0f,
 
-		5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
-		-5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
-		5.0f, -0.5f, -5.0f,  2.0f, 2.0f
+		5.0f, -0.5f,  5.0f,  0.0f, 1.0f, 0.0f,  2.0f,  0.0f,
+		-5.0f, -0.5f, -5.0f,  0.0f, 1.0f, 0.0f,   0.0f, 2.0f,
+		5.0f, -0.5f, -5.0f,  0.0f, 1.0f, 0.0f,  2.0f, 2.0f
 	};
-#endif
-    float planeVertices[] = {
-        // positions            // normals         // texcoords
-         5.0f, -0.5f,  5.0f,  0.0f, 1.0f, 0.0f,  2.0f,  0.0f,
-        -5.0f, -0.5f,  5.0f,  0.0f, 1.0f, 0.0f,   0.0f,  0.0f,
-        -5.0f, -0.5f, -5.0f,  0.0f, 1.0f, 0.0f,   0.0f, 2.0f,
 
-         5.0f, -0.5f,  5.0f,  0.0f, 1.0f, 0.0f,  2.0f,  0.0f,
-        -5.0f, -0.5f, -5.0f,  0.0f, 1.0f, 0.0f,   0.0f, 2.0f,
-         5.0f, -0.5f, -5.0f,  0.0f, 1.0f, 0.0f,  2.0f, 2.0f
-    };
-	
 	landNode->loadMeshObj(planeVertices, sizeof(planeVertices)/sizeof(float));
 	landNode->setMaterial(metalMaterial);
 
@@ -231,46 +196,35 @@ void render::initRender(int width, int height, ply_parser *parser) {
 	planeNode->setScale(glm::vec3(0.009f));
 	planeNode->setRotation(-90.0f, glm::vec3(1.0f, 1.0f , 1.0f));
 	//planeNode->setRotation(-90.0f, glm::vec3(0.0f, 0.0f , 1.0f));
-	/*planeNode->setRotation(90.0f, glm::vec3(0.0f, 0.0f , 1.0f));
-	planeNode->setRotation(90.0f, glm::vec3(0.0f, 1.0f , 0.0f));
-	planeNode->setRotation(90.0f, glm::vec3(0.0f, 0.0f , 1.0f));*/
 
 	graphList.push_back(moonNode);
 	graphList.push_back(planeNode);
 	camera->setup(shaderId);
-	camera->setLightPos0(glm::vec3(-25.0f, 18.25f, 0.0f));
+	camera->setLightPos0(glm::vec3(-10.0f, 18.25f, 10.0f));
 	camera1->setup(shaderId);
 	camera1->setLightPos0(glm::vec3(-25.0f, 18.25f, 0.0f));
 	cameraObj = camera;
 	return;
 }
 
-void render::drawSpheres(rotationAxis axis, objectDirection translate, objectStatusUpdate update) {
+void render::renderScene(const char *cameraName) {
 
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	if (update.isUpdated == true) {
-		if (update.objName.compare("Camera_1") == 0)
-			cameraObj = camera;
-		else if (update.objName.compare("Camera_2") == 0)
-			cameraObj = camera1;
 
-	}
+	if (strcmp(cameraName, "Camera_1") == 0)
+		cameraObj = camera;
+	else
+		cameraObj = camera1;
+
 	for (int i = 0; i < graphList.size(); i++)
 	{
-#if 1
 		if (graphList[i]->getName().compare("Sphere") == 0 || graphList[i]->getName().compare("Basket") == 0) {
 			//std::cout << "NAME " << graphList[i]->getName() << "\n";
 			glm::vec3 scale = graphList[i]->getScale() + glm::vec3(0.0005);
-			graphList[i]->setScale(scale);
-			if (translate == MOVE_RIGHT)
-				graphList[i]->setPosition(glm::vec3(0.005f, 0.0f, 0.0f));
-			if (translate == MOVE_LEFT)
-				graphList[i]->setPosition(glm::vec3(-0.005f, 0.0f, 0.0f));
-			if (translate == MOVE_UP)
-				graphList[i]->setPosition(glm::vec3(0.0f, 0.005f, 0.0f));
-			if (translate == MOVE_DOWN)
-				graphList[i]->setPosition(glm::vec3(0.0f, -0.005f, 0.0f));
+			//graphList[i]->setScale(scale);
+			graphList[i]->setPosition(glm::vec3(0.005f, 0.0f, 0.0f));
+			//graphList[i]->setPosition(glm::vec3(0.000f, 0.0f, -0.0005f));
 		}
 		if (graphList[i]->getName().compare("AntG1") == 0) {
 			graphList[i]->setPosition(glm::vec3(0.0f, 0.0f, 0.5f));
@@ -283,7 +237,6 @@ void render::drawSpheres(rotationAxis axis, objectDirection translate, objectSta
 			graphList[i]->setPosition(glm::vec3(1.0f, 0.0f, 0.0f));
 			//graphList[i]->setRotation(-20.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 		}
-#endif
 		graphList[i]->displayScene(cameraObj->getProjectionMatrix(), cameraObj->getViewMatrix(), cameraObj->getLightPos0());
 	}
 }

@@ -19,18 +19,13 @@ void handleKeys(GLFWwindow* window, int key, int code, int action, int mode);
 class window_mgmt {
 
 	private:
-		objectDirection translate;
-		rotationAxis axis;
-		mesh_object_type mesh_object;
 		GLFWwindow *mainWindow;
 		uint8_t parse_top;
-		ply_parser *parser[10];
 		render render_obj;
 		float deltaTime, lastFrame;
-		objectStatusUpdate update;
+		char *camera;
 	public:
 		window_mgmt();
-		void window_set_ply_object(ply_parser *parser);
 		int window_mainloop_init();
 		void window_handle_event(int key, int code, int action, int mode);
 		void window_mainloop_run();
@@ -39,15 +34,7 @@ class window_mgmt {
 window_mgmt window_mgmr;
 
 window_mgmt::window_mgmt() {
-	translate = MOVE_INVALID;
-	axis = ROTATE_INVALID;
-	parse_top = 0;
-	mesh_object = MESH_OBJECT_1;
-	update.isUpdated = false;
-}
-
-void window_mgmt::window_set_ply_object(ply_parser *parser_obj) {
-	parser[parse_top++] = parser_obj;
+	camera = "Camera_1";
 }
 
 int window_mgmt::window_mainloop_init() {
@@ -88,7 +75,7 @@ int window_mgmt::window_mainloop_init() {
 		glfwTerminate();
 		return 0;
 	}
-	render_obj.initRender(bufferWidth, bufferHeight, parser[0]);
+	render_obj.initRender(bufferWidth, bufferHeight);
 }
 
 void window_mgmt::window_mainloop_run() {
@@ -103,12 +90,7 @@ void window_mgmt::window_mainloop_run() {
 
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//render_obj.drawCubeTexture();
-		translate = MOVE_RIGHT;
-		render_obj.drawSpheres(axis, translate, update);
-		translate = MOVE_INVALID;
-		update.isUpdated = false;
-		axis = ROTATE_INVALID;
+		render_obj.renderScene(camera);
 		glfwSwapBuffers(mainWindow);
 		glfwPollEvents();
 		glfwSetKeyCallback(mainWindow, handleKeys);
@@ -116,27 +98,10 @@ void window_mgmt::window_mainloop_run() {
 }
 
 void window_mgmt::window_handle_event(int key, int code, int action, int mode) {
-	update.isUpdated = true;
-	if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
-		translate = MOVE_LEFT;
-	} else if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
-		translate = MOVE_RIGHT;
-	} else if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
-		translate = MOVE_UP;
-	} else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
-		translate = MOVE_DOWN;
-	} else if (key == 'X' && action == GLFW_PRESS) {
-		axis = ROTATE_X;
-	} else if (key == 'Y' && action == GLFW_PRESS) {
-		axis = ROTATE_Y;
-	} else if (key == 'Z' && action == GLFW_PRESS) {
-		axis = ROTATE_Z;
-	} else if (key == 'C' && action == GLFW_PRESS) {
-		update.objName = "Camera_1";
+	if (key == 'C' && action == GLFW_PRESS) {
+		camera = "Camera_1";
 	} else if (key == 'V' && action == GLFW_PRESS) {
-		update.objName = "Camera_2";
-	} else {
-		update.isUpdated = false;
+		camera = "Camera_2";
 	}
 }
 
@@ -150,10 +115,6 @@ void handleKeys(GLFWwindow* window, int key, int code, int action, int mode)
 
 int main(int argc, char *argv[])
 {
-	ply_parser parser_obj;
-	//parser_obj.load_ply("data/sphere.ply");
-
-	window_mgmr.window_set_ply_object(&parser_obj);
 	window_mgmr.window_mainloop_init();
 	window_mgmr.window_mainloop_run();
 	return 0;

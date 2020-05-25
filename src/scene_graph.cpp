@@ -54,7 +54,7 @@ void sceneRender::loadMeshObjVert(const char *vertFilePath) {
 		_vertices.push_back(vertices[i + 1]);
 		_vertices.push_back(vertices[i + 2]);
 		glm::vec3 vert = glm::vec3(vertices[i], vertices[i + 1], vertices[i + 2]);
-		float theta = atan2(vert.z, vert.x);
+		float theta = atan2(vert.x, vert.z);
 		float u = (theta + PI) / (2 * PI);
 		float phi = acos(vert.y / glm::length(vert));
 		float v = phi / PI;
@@ -96,14 +96,6 @@ void sceneRender::loadMeshObj(const char *plyFilePath) {
 		_vertices.push_back(x);
 		_vertices.push_back(y);
 		_vertices.push_back(z);
-		// Calculate UV
-#if 0
-		float u = asin(x)/PI + 0.5;
-		float v = asin(y)/PI + 0.5;
-		cout << "u v " << u << " " << v << endl;
-		vertex.push_back(u);
-		vertex.push_back(v);
-#endif
 		// Texture Coordinate
 		glm::vec3 vert = glm::vec3(points[i].x, points[i].y, points[i].z);
 		float theta = atan2(vert.z, vert.x);
