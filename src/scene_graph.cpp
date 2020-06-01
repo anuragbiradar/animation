@@ -182,28 +182,24 @@ glm::vec3 sceneNode::getScale() {
 
 void sceneNode::setPosition(glm::vec3 translation) {
 	_position += translation;
-	_localMatrix = glm::mat4(1);
-	//std::cout << "SetPosition " << _name << " vvalue " << glm::to_string(_position) << std::endl;
-	_localMatrix = glm::scale(_localMatrix, _scale);
-	if (_rotateAngle != 0) {
-		//std::cout << "Set Rotation\n";
-		_localMatrix = glm::rotate(_localMatrix, _rotateAngle, _axis);
-	}
-	_localMatrix = glm::translate(_localMatrix, _position);
 }
 
 void sceneNode::setScale(glm::vec3 scale) {
 	_scale = scale;
-	_localMatrix = glm::mat4(1);
-	_localMatrix = glm::scale(_localMatrix, scale);
-	_localMatrix = glm::translate(_localMatrix, _position);
 }
 
 void sceneNode::setRotation(float radian, glm::vec3 axis) {
-	// Check for init
 	_rotateAngle = radian;
 	_axis = axis;
-	_localMatrix = glm::rotate(_localMatrix, radian, axis);
+}
+
+void sceneNode::buildModelMatrix() {
+	_localMatrix = glm::mat4(1);
+	_localMatrix = glm::scale(_localMatrix, _scale);
+	_localMatrix = glm::translate(_localMatrix, _position);
+	if (_rotateAngle != 0) {
+		_localMatrix = glm::rotate(_localMatrix, _rotateAngle, _axis);
+	}
 }
 
 glm::mat4 sceneNode::getWorldMatrix() {
@@ -221,6 +217,7 @@ void sceneNode::addChild(sceneNode *node) {
 
 void sceneNode::displayScene(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, glm::vec3 ligPos0) {
 	//std::cout << "Draw object " << name << "\n";
+	buildModelMatrix();
 	if (_parent) {
 		_worldMatrix = _parent->getWorldMatrix() * _localMatrix;
 	} else {

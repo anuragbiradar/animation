@@ -85,7 +85,7 @@ void window_mgmt::window_mainloop_run() {
         	deltaTime = currentFrame - lastFrame;
         	lastFrame = currentFrame;
 		//std::cout << "Delta " << deltaTime << "\n";
-		if (deltaTime < 0.01f)
+		if (deltaTime < 0.03f)
 			continue;
 
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
