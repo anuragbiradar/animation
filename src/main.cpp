@@ -23,7 +23,7 @@ class window_mgmt {
 		uint8_t parse_top;
 		render render_obj;
 		float deltaTime, lastFrame;
-		char *camera;
+		const char *camera;
 	public:
 		window_mgmt();
 		int window_mainloop_init();

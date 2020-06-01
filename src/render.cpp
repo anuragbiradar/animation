@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include <fstream>
 #include <sstream>
@@ -187,6 +188,7 @@ void render::initRender(int width, int height) {
 	moonNode->loadMeshObj("data/sphere.ply");
 	moonNode->setScale(glm::vec3(0.1f));
 	moonNode->setPosition(glm::vec3(-25.0f, 18.25f, 0.0f));
+	//moonNode->setPosition(glm::vec3(-10.0f, 10.25f, 0.0f));
 	moonNode->setMaterial(moonMaterial);
 
 	sceneNode *planeNode = new sceneNode("Airplane");
@@ -199,7 +201,8 @@ void render::initRender(int width, int height) {
 	graphList.push_back(moonNode);
 	graphList.push_back(planeNode);
 	camera->setup(shaderId);
-	camera->setLightPos0(glm::vec3(-10.0f, 18.25f, 10.0f));
+	camera->setLightPos0(glm::vec3(-25.0f, 10.25f, 0.0f));
+	//camera->setLightPos0(glm::vec3(-10.0f, 10.25f, 0.0f));
 	camera1->setup(shaderId);
 	camera1->setLightPos0(glm::vec3(-25.0f, 18.25f, 0.0f));
 	cameraObj = camera;
@@ -218,20 +221,20 @@ void render::renderScene(const char *cameraName) {
 
 	for (int i = 0; i < graphList.size(); i++)
 	{
-		if (graphList[i]->getName().compare("Sphere") == 0 || graphList[i]->getName().compare("Basket") == 0) {
+		if (graphList[i]->getName().compare("Moon") == 0) {
+			graphList[i]->setPosition(glm::vec3(0.09f, 0.00f, 0.0f));
+			cameraObj->setLightPos0(glm::vec3(0.09f, 0.00f, 0.0f));
+		} else if (graphList[i]->getName().compare("Sphere") == 0) {
 			//std::cout << "NAME " << graphList[i]->getName() << "\n";
 			glm::vec3 scale = graphList[i]->getScale() + glm::vec3(0.0005);
 			graphList[i]->setScale(scale);
 			graphList[i]->setPosition(glm::vec3(0.005f, 0.0f, 0.0f));
 			//graphList[i]->setPosition(glm::vec3(0.000f, 0.0f, -0.0005f));
-		}
-		if (graphList[i]->getName().compare("AntG1") == 0) {
+		} else if (graphList[i]->getName().compare("AntG1") == 0) {
 			graphList[i]->setPosition(glm::vec3(0.0f, 0.0f, 0.5f));
-		}
-		if (graphList[i]->getName().compare("AntG2") == 0) {
+		} else if (graphList[i]->getName().compare("AntG2") == 0) {
 			graphList[i]->setPosition(glm::vec3(0.0f, 0.0f, -0.5f));
-		}
-		if (graphList[i]->getName().compare("Airplane") == 0) {
+		} else if (graphList[i]->getName().compare("Airplane") == 0) {
 			graphList[i]->setPosition(glm::vec3(0.0f, 0.0f, 1.0f));
 			graphList[i]->setPosition(glm::vec3(0.0f, 1.0f, 0.0f));
 			//graphList[i]->setRotation(-20.0f, glm::vec3(1.0f, 0.0f, 0.0f));
