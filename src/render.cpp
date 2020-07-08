@@ -9,6 +9,7 @@
 #include <fstream>
 #include <sstream>
 #include <math.h>
+#include <cstdlib>
 
 #include "render.h"
 using namespace std;
@@ -201,10 +202,10 @@ void render::initRender(int width, int height) {
 	graphList.push_back(moonNode);
 	graphList.push_back(planeNode);
 	camera->setup(shaderId);
-	camera->setLightPos0(glm::vec3(-25.0f, 10.25f, 0.0f));
+	camera->setLightPos0(glm::vec3(-25.0f, 10.25f, -5.0f));
 	//camera->setLightPos0(glm::vec3(-10.0f, 10.25f, 0.0f));
 	camera1->setup(shaderId);
-	camera1->setLightPos0(glm::vec3(-25.0f, 18.25f, 0.0f));
+	camera1->setLightPos0(glm::vec3(-25.0f, 10.25f, -5.0f));
 	cameraObj = camera;
 	return;
 }
@@ -222,14 +223,18 @@ void render::renderScene(const char *cameraName) {
 	for (int i = 0; i < graphList.size(); i++)
 	{
 		if (graphList[i]->getName().compare("Moon") == 0) {
-			graphList[i]->setPosition(glm::vec3(0.09f, 0.00f, 0.0f));
+			glm::vec3 scale = graphList[i]->getScale() + glm::vec3(0.00005);
+			graphList[i]->setScale(scale);
+			graphList[i]->setPosition(glm::vec3(0.09f, -0.01f, 0.0f));
 			cameraObj->setLightPos0(glm::vec3(0.09f, 0.00f, 0.0f));
 		} else if (graphList[i]->getName().compare("Sphere") == 0) {
-			//std::cout << "NAME " << graphList[i]->getName() << "\n";
+			const char *envValue = getenv("SPHERE");
 			glm::vec3 scale = graphList[i]->getScale() + glm::vec3(0.0005);
-			graphList[i]->setScale(scale);
-			graphList[i]->setPosition(glm::vec3(0.005f, 0.0f, 0.0f));
-			//graphList[i]->setPosition(glm::vec3(0.000f, 0.0f, -0.0005f));
+			if (envValue == NULL || strcmp(envValue, "noscale") != 0) {
+				graphList[i]->setScale(scale);
+                        }
+			graphList[i]->setPosition(glm::vec3(-0.005f, -0.0005f, 0.0f));
+			graphList[i]->setPosition(glm::vec3(0.000f, 0.0f, -0.0005f));
 		} else if (graphList[i]->getName().compare("AntG1") == 0) {
 			graphList[i]->setPosition(glm::vec3(0.0f, 0.0f, 0.5f));
 		} else if (graphList[i]->getName().compare("AntG2") == 0) {

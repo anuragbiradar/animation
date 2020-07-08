@@ -17,7 +17,7 @@ vec3 calculateLightPosition(vec3 objectColor)
 	vec3 lightColor = vec3(1.0, 1.0, 1.0);
 	float diffuseStrength = 1.40;
 	//float specularStrength = 0.25;
-	float specularStrength = 0.5;
+	float specularStrength = 0.01;
         vec3 normal = normalize(transpose(inverse(mat3(model))) * Normals);
         vec3 surfacePos = vec3(model * vec4(fragVertex, 1));
         vec3 surfaceToLight = normalize(ligPos0 - surfacePos);
