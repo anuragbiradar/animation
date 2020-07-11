@@ -16,6 +16,7 @@ using namespace std;
 
 static Camera *cameraObj;
 static bool isCrash = false;
+static sceneNode *airRef = NULL;
 
 GLenum glCheckError_(const char *file, int line)
 {
@@ -200,6 +201,7 @@ void render::initRender(int width, int height) {
 	planeNode->setScale(glm::vec3(0.009f));
 	planeNode->setRotation(-90.0f, glm::vec3(1.0f, 1.0f , 1.0f));
 
+	airRef = planeNode;
 	graphList.push_back(moonNode);
 	graphList.push_back(planeNode);
 	camera->setup(shaderId);
@@ -224,6 +226,7 @@ void render::renderScene(const char *cameraName) {
 	else
 		cameraObj = camera1;
 	static int count = 0;
+	static int isCollied = 0;
 	for (int i = 0; i < graphList.size(); i++)
 	{
 		if (graphList[i]->getName().compare("Moon") == 0) {
@@ -235,12 +238,18 @@ void render::renderScene(const char *cameraName) {
 			glm::vec3 scale = graphList[i]->getScale() + glm::vec3(0.0005);
 			if (isCrash) {
 				if (count > 200) {
-					//std::cout << "Will make it disappear\n";
-					glm::vec3 po = graphList[i]->getPosition();
-					std::cout << "Sphere x " << po.x << " y " << po.y << " z " << po.z << endl;
-					graphList[i]->setVisible(false);
-					// free fall
-					graphList[i]->setPosition(glm::vec3(0.0f, -0.05f, 0.0f));
+					if (graphList[i]->isCollision(airRef)) {
+						std::cout << "COLLOISSION\n";
+						isCollied = 1;
+					}
+					if (isCollied) {
+						//std::cout << "Will make it disappear\n";
+						glm::vec3 po = graphList[i]->getPosition();
+						//std::cout << "Sphere x " << po.x << " y " << po.y << " z " << po.z << endl;
+						graphList[i]->setVisible(false);
+						// free fall
+						graphList[i]->setPosition(glm::vec3(0.0f, -0.05f, 0.0f));
+					}
 				} else {
 					graphList[i]->setScale(scale);
 					graphList[i]->setPosition(glm::vec3(-0.005f, -0.0005f, 0.0f));
@@ -263,7 +272,7 @@ void render::renderScene(const char *cameraName) {
 				} else {
 					graphList[i]->setPosition(glm::vec3(-1.0f, 0.0f, 0.0f));
 					glm::vec3 po = graphList[i]->getPosition();
-					std::cout << "Air x " << po.x << " y " << po.y << " z " << po.z << endl;
+					//std::cout << "Air x " << po.x << " y " << po.y << " z " << po.z << endl;
 				}
 			} else {
 				graphList[i]->setPosition(glm::vec3(0.0f, 0.0f, 1.0f));

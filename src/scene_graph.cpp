@@ -127,10 +127,10 @@ void sceneRender::loadMeshObj(const char *plyFilePath) {
 }
 
 float sceneRender::getMinX() {
-	//return _plyData.getMinX();
+	return _plyData.getPlyMinX();
 }
 float sceneRender::getMaxX() {
-	//return _plyData.getMaxX();
+	return _plyData.getPlyMaxX();
 }
 
 void sceneRender::setMaterial(Material *material) {
@@ -264,6 +264,9 @@ bool sceneNode::isCollision(sceneNode *obj) {
 	float sMaxX = this->getMaxX();
         glm::vec3 oPos = obj->getPosition();
 	glm::vec3 sPos = this->getPosition();
-	std::cout << "Self " << sPos.x << " minX "<< sMinX << " maxX "<< sMaxX << "\n";
-	std::cout << "Obj " << oPos.x << " minX "<< oMinX << " maxX "<< oMaxX << "\n";
+	//std::cout << "Self " << sPos.x << " minX "<< sMinX << " maxX "<< sMaxX << "\n";
+	//std::cout << "Obj " << oPos.x << " minX "<< oMinX << " maxX "<< oMaxX << "\n";
+	if (abs(abs(oPos.x) - abs(oMinX)) <= abs(abs(sPos.x) + abs(sMaxX)))
+		return true;
+	return false;
 }

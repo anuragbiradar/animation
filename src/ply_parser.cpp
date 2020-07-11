@@ -10,6 +10,8 @@
 using namespace std;
 
 ply_parser::ply_parser() {
+	maxX = maxY = maxZ = 0;
+	minX = minY = minZ = 0;
 }
 
 ply_parser::~ply_parser() {
@@ -90,6 +92,10 @@ void ply_parser::load_ply(const char *file_path) {
 		point normalv;
 		calculateNormal(&vertices[v1], &vertices[v2], &vertices[v3], &normalv);
 		//cout << "Normal " << normalv.x << " " << normalv.y << " " << normalv.z << endl;
+		if (vertices[v1].x > maxX)
+			maxX = vertices[v1].x;
+		if (vertices[v1].x < minX)
+			minX = vertices[v1].x;
 		this->normal.push_back(normalv);
 		vertices[v1].set_vertex_normal(normalv.x, normalv.y, normalv.z);
 		vertices[v2].set_vertex_normal(normalv.x, normalv.y, normalv.z);
@@ -103,7 +109,12 @@ void ply_parser::load_ply(const char *file_path) {
 		}
 	}
 }
-
+float ply_parser::getPlyMinX() {
+	return minX;
+}
+float ply_parser::getPlyMaxX() {
+	return maxX;
+}
 void ply_parser::load_vert(const char *file_path) {
 	if (file_path == NULL)
 		return;

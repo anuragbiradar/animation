@@ -41,6 +41,8 @@ class ply_parser {
 		vector<point> points;
 		vector<point> normal;
 		GLfloat *element_face_points;
+		float maxX, maxY, maxZ;
+		float minX, minY, minZ;
 		uint32_t total_vertices;
 		uint32_t total_faces;
 		vector<float> vertex;
@@ -56,5 +58,7 @@ class ply_parser {
 		vector<point> get_element_face_points();
 		vector<point> get_normal_vector();
 		vector<float> get_vertex();
+		float getPlyMinX();
+		float getPlyMaxX();
 };
 #endif
