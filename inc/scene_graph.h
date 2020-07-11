@@ -99,6 +99,8 @@ public:
 	void loadMeshObjVert(const char *vertFilePath);
 	void setMaterial(Material *mat);
 	Material *getMaterial();
+	float getMinX();
+	float getMaxX();
 };
 
 class sceneNode : public sceneRender {
@@ -108,12 +110,15 @@ private:
 	glm::vec3 _scale, _position, _axis;
 	float _rotateAngle;
 	sceneNode *_parent;
+	bool isVisible;
 	vector<sceneNode*> _childList;
 public:
 	sceneNode(std::string objName);
 	~sceneNode();
+	void setVisible(bool set);
 	void addChild(sceneNode *node);
 	void setPosition(glm::vec3 position);
+	glm::vec3 getPosition();
 	void setScale(glm::vec3 scale);
 	void setRotation(float radians, glm::vec3 axis);
 	void buildModelMatrix();
@@ -122,5 +127,6 @@ public:
 	glm::mat4 getWorldMatrix();
 	void displayScene(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, glm::vec3 ligPos0);
 	std::string getName();
+	bool isCollision(sceneNode *obj);
 };
 #endif

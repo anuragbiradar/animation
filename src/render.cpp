@@ -15,6 +15,7 @@
 using namespace std;
 
 static Camera *cameraObj;
+static bool isCrash = false;
 
 GLenum glCheckError_(const char *file, int line)
 {
@@ -207,6 +208,10 @@ void render::initRender(int width, int height) {
 	camera1->setup(shaderId);
 	camera1->setLightPos0(glm::vec3(-25.0f, 10.25f, -5.0f));
 	cameraObj = camera;
+	const char *envValue = getenv("CRASH");
+	if (envValue != NULL && strcmp(envValue, "1") == 0) {
+		isCrash = true;
+	}
 	return;
 }
 
@@ -214,12 +219,11 @@ void render::renderScene(const char *cameraName) {
 
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	if (strcmp(cameraName, "Camera_1") == 0)
 		cameraObj = camera;
 	else
 		cameraObj = camera1;
-
+	static int count = 0;
 	for (int i = 0; i < graphList.size(); i++)
 	{
 		if (graphList[i]->getName().compare("Moon") == 0) {
@@ -228,22 +232,47 @@ void render::renderScene(const char *cameraName) {
 			graphList[i]->setPosition(glm::vec3(0.09f, -0.01f, 0.0f));
 			cameraObj->setLightPos0(glm::vec3(0.09f, 0.00f, 0.0f));
 		} else if (graphList[i]->getName().compare("Sphere") == 0) {
-			const char *envValue = getenv("SPHERE");
 			glm::vec3 scale = graphList[i]->getScale() + glm::vec3(0.0005);
-			if (envValue == NULL || strcmp(envValue, "noscale") != 0) {
+			if (isCrash) {
+				if (count > 200) {
+					//std::cout << "Will make it disappear\n";
+					glm::vec3 po = graphList[i]->getPosition();
+					std::cout << "Sphere x " << po.x << " y " << po.y << " z " << po.z << endl;
+					graphList[i]->setVisible(false);
+					// free fall
+					graphList[i]->setPosition(glm::vec3(0.0f, -0.05f, 0.0f));
+				} else {
+					graphList[i]->setScale(scale);
+					graphList[i]->setPosition(glm::vec3(-0.005f, -0.0005f, 0.0f));
+					graphList[i]->setPosition(glm::vec3(0.000f, 0.0f, -0.0005f));
+				}
+			} else {
 				graphList[i]->setScale(scale);
-                        }
-			graphList[i]->setPosition(glm::vec3(-0.005f, -0.0005f, 0.0f));
-			graphList[i]->setPosition(glm::vec3(0.000f, 0.0f, -0.0005f));
+				graphList[i]->setPosition(glm::vec3(-0.005f, -0.0005f, 0.0f));
+				graphList[i]->setPosition(glm::vec3(0.000f, 0.0f, -0.0005f));
+			}
 		} else if (graphList[i]->getName().compare("AntG1") == 0) {
 			graphList[i]->setPosition(glm::vec3(0.0f, 0.0f, 0.5f));
 		} else if (graphList[i]->getName().compare("AntG2") == 0) {
 			graphList[i]->setPosition(glm::vec3(0.0f, 0.0f, -0.5f));
 		} else if (graphList[i]->getName().compare("Airplane") == 0) {
-			graphList[i]->setPosition(glm::vec3(0.0f, 0.0f, 1.0f));
-			graphList[i]->setPosition(glm::vec3(0.0f, 1.0f, 0.0f));
+			if (isCrash) {
+				if (count < 70) {
+					graphList[i]->setPosition(glm::vec3(0.0f, 0.0f, 1.0f));
+					graphList[i]->setPosition(glm::vec3(0.0f, 1.0f, 0.0f));
+				} else {
+					graphList[i]->setPosition(glm::vec3(-1.0f, 0.0f, 0.0f));
+					glm::vec3 po = graphList[i]->getPosition();
+					std::cout << "Air x " << po.x << " y " << po.y << " z " << po.z << endl;
+				}
+			} else {
+				graphList[i]->setPosition(glm::vec3(0.0f, 0.0f, 1.0f));
+				graphList[i]->setPosition(glm::vec3(0.0f, 1.0f, 0.0f));
+			}
 			//graphList[i]->setRotation(-20.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+			//std::cout << "Count " << count << "\n";
 		}
 		graphList[i]->displayScene(cameraObj->getProjectionMatrix(), cameraObj->getViewMatrix(), cameraObj->getLightPos0());
 	}
+	count++;
 }

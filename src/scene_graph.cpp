@@ -126,6 +126,13 @@ void sceneRender::loadMeshObj(const char *plyFilePath) {
 	glBindVertexArray(0);
 }
 
+float sceneRender::getMinX() {
+	//return _plyData.getMinX();
+}
+float sceneRender::getMaxX() {
+	//return _plyData.getMaxX();
+}
+
 void sceneRender::setMaterial(Material *material) {
 	_material = material;
 }
@@ -167,6 +174,7 @@ sceneNode::sceneNode(std::string objName) {
 	_position = glm::vec3(0.0f);
 	_rotateAngle = 0.0f;
 	_parent = NULL;
+	isVisible = true;
 }
 
 sceneNode::~sceneNode() {
@@ -182,6 +190,10 @@ glm::vec3 sceneNode::getScale() {
 
 void sceneNode::setPosition(glm::vec3 translation) {
 	_position += translation;
+}
+
+glm::vec3 sceneNode::getPosition() {
+	return _position;
 }
 
 void sceneNode::setScale(glm::vec3 scale) {
@@ -215,6 +227,10 @@ void sceneNode::addChild(sceneNode *node) {
 	node->_parent = this;
 }
 
+void sceneNode::setVisible(bool set) {
+	isVisible = set;
+}
+
 void sceneNode::displayScene(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, glm::vec3 ligPos0) {
 	//std::cout << "Draw object " << name << "\n";
 	buildModelMatrix();
@@ -226,7 +242,9 @@ void sceneNode::displayScene(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, g
 	Material *_mat = getMaterial();
 
 	//std::cout << "Draw " << _name << std::endl;
-	draw(projectionMatrix, viewMatrix, _worldMatrix, ligPos0);
+	if (isVisible) {
+		draw(projectionMatrix, viewMatrix, _worldMatrix, ligPos0);
+	}
 	
 	vector<sceneNode*>::iterator it;
 	for (it = _childList.begin(); it != _childList.end(); it++) {
@@ -236,4 +254,16 @@ void sceneNode::displayScene(glm::mat4 projectionMatrix, glm::mat4 viewMatrix, g
 
 std::string sceneNode::getName() {
 	return _name;
+}
+
+bool sceneNode::isCollision(sceneNode *obj) {
+
+	float oMinX = obj->getMinX();
+	float oMaxX = obj->getMaxX();
+	float sMinX = this->getMinX();
+	float sMaxX = this->getMaxX();
+        glm::vec3 oPos = obj->getPosition();
+	glm::vec3 sPos = this->getPosition();
+	std::cout << "Self " << sPos.x << " minX "<< sMinX << " maxX "<< sMaxX << "\n";
+	std::cout << "Obj " << oPos.x << " minX "<< oMinX << " maxX "<< oMaxX << "\n";
 }
